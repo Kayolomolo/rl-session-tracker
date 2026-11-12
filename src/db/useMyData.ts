@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { activeSession } from '../lib/session'
+import type { Goal } from '../lib/goals'
 import type { Profile, Session } from '../lib/types'
 import { makeActions, type Actions } from './actions'
 import { useAuth } from './auth'
@@ -11,6 +12,7 @@ export interface MyData {
   user?: { id: string; email: string }
   profile?: Profile
   sessions: Session[]
+  goals: Goal[]
   active?: Session
   actions?: Actions
   pending: number
@@ -23,7 +25,7 @@ export function useMyData(): MyData {
   const sync = useSync(auth.user?.id)
   const userId = auth.user?.id
   const actions = useMemo(() => (userId ? makeActions(sync.dispatch, sync.getStore, userId) : undefined), [userId, sync.dispatch, sync.getStore])
-  const base = { pending: sync.pending, dropped: sync.dropped, online: sync.online, sessions: sync.store.sessions }
+  const base = { pending: sync.pending, dropped: sync.dropped, online: sync.online, sessions: sync.store.sessions, goals: sync.store.goals ?? [] }
   if (auth.loading) return { ...base, isLoading: true }
   if (!auth.user) return { ...base, isLoading: false }
   if (!sync.loaded) return { ...base, isLoading: true, user: auth.user }

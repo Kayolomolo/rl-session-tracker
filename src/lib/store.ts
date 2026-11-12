@@ -1,6 +1,7 @@
+import type { Goal } from './goals'
 import type { Activity, Match, Profile, Session } from './types'
 
-export interface Store { profile?: Profile; sessions: Session[] }
+export interface Store { profile?: Profile; sessions: Session[]; goals: Goal[] }
 export type SessionCore = Omit<Session, 'matches' | 'activities'>
 
 export type Op =
@@ -8,7 +9,8 @@ export type Op =
   | { t: 'match'; sessionId: string; row: Match }
   | { t: 'activity'; sessionId: string; row: Activity }
   | { t: 'profile'; row: Profile }
-  | { t: 'delMatch' | 'delActivity' | 'delSession'; id: string }
+  | { t: 'goal'; row: Goal }
+  | { t: 'delMatch' | 'delActivity' | 'delSession' | 'delGoal'; id: string }
 
 const byTime = <T,>(key: keyof T) => (a: T, b: T) => (a[key] as number) - (b[key] as number)
 const upsert = <T extends { id: string }>(list: T[], row: T) => [...list.filter((x) => x.id !== row.id), row]
@@ -37,6 +39,10 @@ export function applyOp(store: Store, op: Op): Store {
       return { ...store, sessions: store.sessions.map((s) => ({ ...s, activities: s.activities.filter((x) => x.id !== op.id) })) }
     case 'delSession':
       return { ...store, sessions: store.sessions.filter((s) => s.id !== op.id) }
+    case 'goal':
+      return { ...store, goals: upsert(store.goals ?? [], op.row).sort((a, b) => a.createdAt - b.createdAt) }
+    case 'delGoal':
+      return { ...store, goals: (store.goals ?? []).filter((g) => g.id !== op.id) }
   }
 }
 

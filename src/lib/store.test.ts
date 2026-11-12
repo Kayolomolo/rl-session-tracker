@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { applyOp, isPermanentError, rebase, type Store } from './store'
 import { act, m, profile, sess } from './testHelpers'
 
-const base = (): Store => ({ profile: profile({}), sessions: [sess({ id: 's1', startedAt: 10 })] })
+const base = (): Store => ({ profile: profile({}), sessions: [sess({ id: 's1', startedAt: 10 })], goals: [] })
 
 describe('applyOp', () => {
   test('nieuwe sessie komt vooraan (nieuwste eerst)', () => {
@@ -84,5 +84,16 @@ describe('isPermanentError', () => {
     expect(isPermanentError({ code: '22P02', status: 400 })).toBe(true)
     expect(isPermanentError({ code: 'PGRST116', status: 406 })).toBe(true)
     expect(isPermanentError({ code: 'PGRST204', status: 400 })).toBe(true)
+  })
+})
+
+describe('doelen in de store', () => {
+  const goal = { id: 'g1', createdAt: 1, config: { kind: 'mmr' as const, mode: '2v2' as const, mmr: 1000 } }
+  test('toevoegen, vervangen en verwijderen', () => {
+    let st = applyOp(base(), { t: 'goal', row: goal })
+    expect(st.goals).toEqual([goal])
+    st = applyOp(st, { t: 'goal', row: { ...goal, achievedAt: 5 } })
+    expect(st.goals).toEqual([{ ...goal, achievedAt: 5 }])
+    expect(applyOp(st, { t: 'delGoal', id: 'g1' }).goals).toEqual([])
   })
 })

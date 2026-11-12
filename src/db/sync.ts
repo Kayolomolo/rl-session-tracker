@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Op, Store } from '../lib/store'
 import { createSyncEngine, type Cache, type EngineState, type SyncEngine, type Transport } from './engine'
 import { fetchAllRows } from './paging'
-import { opToRequest, rowsToStore, type ActivityRow, type MatchRow, type ProfileRow, type SessionRow } from './rows'
+import { opToRequest, rowsToStore, type ActivityRow, type GoalRow, type MatchRow, type ProfileRow, type SessionRow } from './rows'
 import { supabase } from './supabase'
 
 const keyFor = (userId: string) => `rl-tracker:${userId}`
@@ -22,8 +22,8 @@ function transportFor(userId: string): Transport {
   const all = <T,>(table: string) => fetchAllRows<T>((from, to) => supabase.from(table).select('*').order('id').range(from, to))
   return {
     async fetchAll() {
-      const [p, s, m, a] = await Promise.all([all<ProfileRow>('profiles'), all<SessionRow>('sessions'), all<MatchRow>('matches'), all<ActivityRow>('activities')])
-      return rowsToStore(p, s, m, a)
+      const [p, s, m, a, g] = await Promise.all([all<ProfileRow>('profiles'), all<SessionRow>('sessions'), all<MatchRow>('matches'), all<ActivityRow>('activities'), all<GoalRow>('goals')])
+      return rowsToStore(p, s, m, a, g)
     },
     async send(op) {
       const req = opToRequest(op, userId)
@@ -35,7 +35,7 @@ function transportFor(userId: string): Transport {
   }
 }
 
-const INITIAL: EngineState = { store: { sessions: [] }, loaded: false, pending: 0, dropped: 0 }
+const INITIAL: EngineState = { store: { sessions: [], goals: [] }, loaded: false, pending: 0, dropped: 0 }
 
 export interface SyncState extends EngineState { online: boolean; dispatch: (op: Op) => void; getStore: () => Store }
 
@@ -55,7 +55,7 @@ export function useSync(userId: string | undefined): SyncState {
     let timer: ReturnType<typeof setTimeout> | undefined
     const soon = () => { clearTimeout(timer); timer = setTimeout(() => void e.sync(), 400) }
     const channel = supabase.channel(`rl-${userId}-${crypto.randomUUID()}`)
-    for (const table of ['sessions', 'matches', 'activities']) channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` }, soon)
+    for (const table of ['sessions', 'matches', 'activities', 'goals']) channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` }, soon)
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` }, soon)
     channel.subscribe()
 

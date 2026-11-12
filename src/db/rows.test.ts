@@ -37,3 +37,14 @@ test('opToRequest voor verwijderen en profiel', () => {
   expect(opToRequest({ t: 'delSession', id: 's1' }, 'u1')).toEqual({ table: 'sessions', kind: 'delete', id: 's1' })
   expect(opToRequest({ t: 'profile', row: { id: 'u1', name: 'Kay', ranks: {}, askMmr: true, idleMinutes: 30, lastMode: '1v1', customActivities: { warmup: ['X'], training: [] } } }, 'u1')).toMatchObject({ row: { id: 'u1', name: 'Kay', ranks: {}, ask_mmr: true, idle_minutes: 30, last_mode: '1v1', custom_activities: { warmup: ['X'], training: [] } } })
 })
+
+test('rowsToStore en opToRequest voor doelen', () => {
+  const st = rowsToStore([], [], [], [], [{ id: 'g1', user_id: 'u1', kind: 'mmr', config: { kind: 'mmr', mode: '2v2', mmr: 1000 }, created_at: 1, achieved_at: null, archived_at: null }])
+  expect(st.goals).toEqual([{ id: 'g1', createdAt: 1, config: { kind: 'mmr', mode: '2v2', mmr: 1000 } }])
+  expect(rowsToStore([], [], [], []).goals).toEqual([])
+  expect(opToRequest({ t: 'goal', row: { id: 'g1', createdAt: 1, achievedAt: 9, config: { kind: 'mmr', mode: '2v2', mmr: 1000 } } }, 'u1')).toEqual({
+    table: 'goals', kind: 'upsert',
+    row: { id: 'g1', user_id: 'u1', kind: 'mmr', config: { kind: 'mmr', mode: '2v2', mmr: 1000 }, created_at: 1, achieved_at: 9, archived_at: null },
+  })
+  expect(opToRequest({ t: 'delGoal', id: 'g1' }, 'u1')).toEqual({ table: 'goals', kind: 'delete', id: 'g1' })
+})

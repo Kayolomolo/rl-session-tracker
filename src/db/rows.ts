@@ -1,4 +1,5 @@
 import { applyOp, type Op, type Store } from '../lib/store'
+import type { Goal, GoalConfig } from '../lib/goals'
 import type { ActivityKind, Mode, Profile, RankEntry, Result } from '../lib/types'
 
 export interface ProfileRow { id: string; name: string; ranks: unknown; ask_mmr: boolean | null; idle_minutes: number | null; last_mode: string | null; custom_activities: unknown; created_at?: number | null }
@@ -6,7 +7,9 @@ export interface SessionRow { id: string; user_id: string; started_at: number; e
 export interface MatchRow { id: string; user_id: string; session_id: string; mode: string; result: string; rank: string | null; mmr: number | null; played_at: number }
 export interface ActivityRow { id: string; user_id: string; session_id: string; kind: string; type: string; started_at: number; ended_at: number | null; note: string | null }
 
-export type Table = 'profiles' | 'sessions' | 'matches' | 'activities'
+export interface GoalRow { id: string; user_id: string; kind: string; config: unknown; created_at: number; achieved_at: number | null; archived_at: number | null }
+
+export type Table = 'profiles' | 'sessions' | 'matches' | 'activities' | 'goals'
 export type Request = { table: Table; kind: 'upsert'; row: Record<string, unknown> } | { table: Table; kind: 'delete'; id: string }
 
 const num = (v: number | string | null | undefined) => (v === null || v === undefined ? undefined : Number(v))
@@ -24,8 +27,16 @@ function toProfile(r: ProfileRow): Profile {
   }
 }
 
-export function rowsToStore(profiles: ProfileRow[], sessions: SessionRow[], matches: MatchRow[], activities: ActivityRow[]): Store {
-  let st: Store = { profile: profiles[0] ? toProfile(profiles[0]) : undefined, sessions: [] }
+function toGoal(r: GoalRow): Goal {
+  const g: Goal = { id: r.id, createdAt: Number(r.created_at), config: r.config as GoalConfig }
+  if (r.achieved_at !== null) g.achievedAt = Number(r.achieved_at)
+  if (r.archived_at !== null) g.archivedAt = Number(r.archived_at)
+  return g
+}
+
+export function rowsToStore(profiles: ProfileRow[], sessions: SessionRow[], matches: MatchRow[], activities: ActivityRow[], goals: GoalRow[] = []): Store {
+  let st: Store = { profile: profiles[0] ? toProfile(profiles[0]) : undefined, sessions: [], goals: [] }
+  for (const g of goals) st = applyOp(st, { t: 'goal', row: toGoal(g) })
   for (const s of sessions) st = applyOp(st, { t: 'session', row: { id: s.id, startedAt: Number(s.started_at), endedAt: num(s.ended_at), lastActivityAt: Number(s.last_activity_at) } })
   for (const x of matches) {
     const row = { id: x.id, mode: x.mode as Mode, result: x.result as Result, playedAt: Number(x.played_at), ...(x.rank ? { rank: x.rank } : {}), ...(x.mmr !== null ? { mmr: Number(x.mmr) } : {}) }
@@ -51,5 +62,8 @@ export function opToRequest(op: Op, userId: string): Request {
     case 'delMatch': return { table: 'matches', kind: 'delete', id: op.id }
     case 'delActivity': return { table: 'activities', kind: 'delete', id: op.id }
     case 'delSession': return { table: 'sessions', kind: 'delete', id: op.id }
+    case 'goal':
+      return { table: 'goals', kind: 'upsert', row: { id: op.row.id, user_id: userId, kind: op.row.config.kind, config: op.row.config, created_at: op.row.createdAt, achieved_at: op.row.achievedAt ?? null, archived_at: op.row.archivedAt ?? null } }
+    case 'delGoal': return { table: 'goals', kind: 'delete', id: op.id }
   }
 }

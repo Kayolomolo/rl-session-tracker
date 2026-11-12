@@ -1,5 +1,6 @@
 import { activeSession, runningActivity } from '../lib/session'
 import type { Op, Store } from '../lib/store'
+import type { Goal, GoalConfig } from '../lib/goals'
 import type { Activity, ActivityKind, Match, Profile, Session } from '../lib/types'
 
 const uid = () => crypto.randomUUID()
@@ -56,5 +57,15 @@ export function makeActions(dispatch: (op: Op) => void, getStore: () => Store, u
     },
     deleteActivity(id: string) { dispatch({ t: 'delActivity', id }) },
     deleteSession(s: Session) { dispatch({ t: 'delSession', id: s.id }) },
+    saveGoal(config: GoalConfig, existing?: Goal): string {
+      const id = existing?.id ?? uid()
+      const configChanged = existing && JSON.stringify(existing.config) !== JSON.stringify(config)
+      const row: Goal = { id, config, createdAt: existing?.createdAt ?? Date.now(), ...(existing?.archivedAt ? { archivedAt: existing.archivedAt } : {}), ...(existing?.achievedAt && !configChanged ? { achievedAt: existing.achievedAt } : {}) }
+      dispatch({ t: 'goal', row })
+      return id
+    },
+    deleteGoal(id: string) { dispatch({ t: 'delGoal', id }) },
+    archiveGoal(goal: Goal) { dispatch({ t: 'goal', row: { ...goal, archivedAt: Date.now() } }) },
+    markAchieved(goal: Goal, at: number) { dispatch({ t: 'goal', row: { ...goal, achievedAt: at } }) },
   }
 }

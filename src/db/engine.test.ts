@@ -11,7 +11,7 @@ function memoryStorage(initial?: Cache) {
   return { read: () => c, write: (x: Cache) => { c = x }, get: () => c }
 }
 
-const server = (s: Partial<Store> = {}): Store => ({ profile: profile({}), sessions: [], ...s })
+const server = (s: Partial<Store> = {}): Store => ({ profile: profile({}), sessions: [], goals: [], ...s })
 
 describe('sync-engine', () => {
   test('wachtrij blijft staan bij tijdelijke fout en wordt later verstuurd', async () => {

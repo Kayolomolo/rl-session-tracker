@@ -9,12 +9,12 @@ export interface Transport {
 }
 export interface EngineState { store: Store; loaded: boolean; error?: string; pending: number; dropped: number }
 
-const EMPTY: Store = { sessions: [] }
+const EMPTY: Store = { sessions: [], goals: [] }
 
 /** Lokaal-eerst synchronisatie: wijzigingen direct lokaal, op volgorde naar de server, serverstand + wachtrij = wat je ziet. */
 export function createSyncEngine(transport: Transport, storage: Storage, onChange: (s: EngineState) => void) {
   const cached = storage.read()
-  let store: Store = cached?.store ?? EMPTY
+  let store: Store = cached ? { ...cached.store, goals: cached.store.goals ?? [] } : EMPTY
   let queue: Op[] = cached?.queue ?? []
   let loaded = !!cached
   let error: string | undefined
