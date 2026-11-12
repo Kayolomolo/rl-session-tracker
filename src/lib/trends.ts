@@ -82,3 +82,8 @@ export function rankHistory(sessions: Session[], mode: Mode, since?: number): Ra
   const mmr = matches.filter((x) => x.mmr !== undefined).map((x) => ({ at: x.playedAt, mmr: x.mmr! }))
   return { steps, mmr }
 }
+
+/** Een gekozen notitiefilter vervalt zodra die activiteit geen notities meer heeft. */
+export function activeNoteFilter(filter: string | null, types: string[]): string | null {
+  return filter && types.includes(filter) ? filter : null
+}

@@ -9,7 +9,8 @@ import { useStoredState } from '../hooks/useStoredState'
 import { KIND_LABEL } from '../lib/activities'
 import { activityTotals } from '../lib/stats'
 import { formatDate, formatDuration, startOfMonth, startOfWeek } from '../lib/time'
-import { notesList, weekStarts, weeklyTraining, type Range } from '../lib/trends'
+import { activeNoteFilter, notesList, weekStarts, weeklyTraining, type Range } from '../lib/trends'
+import { trainingSummary } from '../lib/summaries'
 import type { ActivityKind } from '../lib/types'
 import { isRange, RANGE_OPTIONS, weekLabel } from './stats/ranges'
 
@@ -45,9 +46,10 @@ function KindBlock({ kind, now }: { kind: ActivityKind; now: number }) {
 
 function Notes() {
   const { sessions } = useData()
-  const [filter, setFilter] = useState<string | null>(null)
+  const [chosen, setFilter] = useState<string | null>(null)
   const all = notesList(sessions)
   const types = [...new Set(all.map((n) => n.type))]
+  const filter = activeNoteFilter(chosen, types)
   const shown = filter ? all.filter((n) => n.type === filter) : all
   return (
     <Card className="space-y-3">
@@ -90,7 +92,7 @@ export function TrainingPage() {
           <RangePicker value={range} options={RANGE_OPTIONS} onChange={setRange} />
         </div>
         {hasData ? (
-          <BarChart label="Warm-up en training per week" colors={['blue', 'orange']} highlightLast
+          <BarChart label={`Warm-up en training per week. ${trainingSummary(weeks)}`} colors={['blue', 'orange']} highlightLast
             bars={weeks.map((w) => ({ x: weekLabel(w.week), values: [w.warmupMs, w.trainingMs], tip: `week van ${weekLabel(w.week)} · warm-up ${min(w.warmupMs)} · training ${min(w.trainingMs)}` }))} />
         ) : <p className="py-6 text-center text-sm text-muted">Start een warm-up of training tijdens een sessie om je weken te zien.</p>}
         <p className="flex gap-4 text-xs text-muted"><span><span className="text-blue-text">■</span> warm-up</span><span><span className="text-orange-text">■</span> training</span></p>

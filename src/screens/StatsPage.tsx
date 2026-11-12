@@ -13,6 +13,7 @@ import { totals } from '../lib/stats'
 import { formatDuration } from '../lib/time'
 import { rankHistory, weekStarts, weeklyVolume, weeklyWinRate, type Range } from '../lib/trends'
 import { MODES, type Mode } from '../lib/types'
+import { volumeSummary, winSummary } from '../lib/summaries'
 import { isRange, RANGE_OPTIONS, weekLabel } from './stats/ranges'
 
 type ModeFilter = 'all' | Mode
@@ -53,7 +54,7 @@ export function StatsPage() {
           <RangePicker value={winMode} options={MODE_OPTIONS} onChange={setWinMode} />
         </div>
         {win.some((w) => w.played > 0) ? (
-          <LineChart label={`Winpercentage per week, ${winMode === 'all' ? 'alle modi' : winMode}`} min={0} max={100} reference={50}
+          <LineChart label={`Winpercentage per week, ${winMode === 'all' ? 'alle modi' : winMode}. ${winSummary(win)}`} min={0} max={100} reference={50}
             points={win.map((w) => ({ x: weekLabel(w.week), y: w.winRate, tip: `week van ${weekLabel(w.week)} · ${w.winRate}% · ${w.played} games` }))} />
         ) : <Empty text="Speel een paar wedstrijden om je winpercentage per week te zien." />}
         <p className="text-xs text-muted">Stippellijn = 50%. Weken zonder games laten een gat.</p>
@@ -62,7 +63,7 @@ export function StatsPage() {
       <Card className="space-y-3">
         <Label>Games en speeltijd per week</Label>
         {volume.some((v) => v.games > 0 || v.playedMs > 0) ? (
-          <BarChart label="Aantal games per week" colors={['blue']} highlightLast
+          <BarChart label={`Aantal games per week. ${volumeSummary(volume)}`} colors={['blue']} highlightLast
             bars={volume.map((v) => ({ x: weekLabel(v.week), values: [v.games], tip: `week van ${weekLabel(v.week)} · ${v.games} games · ${formatDuration(v.playedMs)}` }))} />
         ) : <Empty text="Speel een sessie om je games per week te zien." />}
         <p className="text-sm text-muted">Deze week: <span className="text-ink">{thisWeek?.games ?? 0} games · {formatDuration(thisWeek?.playedMs ?? 0)}</span></p>
@@ -74,10 +75,10 @@ export function StatsPage() {
           <RangePicker value={rankMode} options={MODE_ONLY} onChange={setRankMode} />
         </div>
         {useMmr ? (
-          <LineChart label={`MMR-verloop ${rankMode}`} color="orange" min={mmrMin} max={mmrMax}
+          <LineChart label={`MMR-verloop ${rankMode}: van ${ranks.mmr[0]?.mmr} naar ${ranks.mmr.at(-1)?.mmr} MMR.`} color="orange" min={mmrMin} max={mmrMax}
             points={ranks.mmr.map((p) => ({ x: fmtDay(p.at), y: p.mmr, tip: `${fmtDay(p.at)} · ${p.mmr} MMR` }))} />
         ) : ranks.steps.length ? (
-          <LineChart label={`Rank-verloop ${rankMode}`} color="orange" step min={rankMin} max={rankMax}
+          <LineChart label={`Rank-verloop ${rankMode}: van ${ranks.steps[0]?.label} naar ${ranks.steps.at(-1)?.label}.`} color="orange" step min={rankMin} max={rankMax}
             points={ranks.steps.map((p) => ({ x: fmtDay(p.at), y: p.index, tip: `${fmtDay(p.at)} · ${p.label}` }))} />
         ) : <Empty text="Stel je rank in bij Profile, dan zie je hier je verloop." />}
         {ranks.steps.length > 0 && (

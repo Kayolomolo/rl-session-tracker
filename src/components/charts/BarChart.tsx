@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChartTip } from './ChartTip'
+import { barLayout } from './geometry'
 
 const COLORS = { blue: 'var(--color-blue)', orange: 'var(--color-orange)' }
 export interface Bar { x: string; values: number[]; tip: string }
@@ -7,14 +8,12 @@ export interface Bar { x: string; values: number[]; tip: string }
 interface Props { bars: Bar[]; colors: (keyof typeof COLORS)[]; highlightLast?: boolean; height?: number; label: string }
 
 const W = 300
-const LEAN = Math.tan((8 * Math.PI) / 180)
 
 export function BarChart({ bars, colors, highlightLast = false, height = 100, label }: Props) {
   const [sel, setSel] = useState<number | null>(null)
   const bottom = height - 16
   const max = Math.max(1, ...bars.map((b) => b.values.reduce((s, v) => s + v, 0)))
-  const slot = W / Math.max(1, bars.length)
-  const bw = Math.max(4, Math.min(28, slot * 0.6))
+  const { slot, bw, tan } = barLayout(bars.length, W, bottom)
   const n = bars.length
   const labelIdx = [...new Set([0, Math.floor((n - 1) / 2), n - 1])].filter((i) => i >= 0)
   return (
@@ -28,7 +27,7 @@ export function BarChart({ bars, colors, highlightLast = false, height = 100, la
           return (
             <g key={i} onClick={() => setSel(sel === i ? null : i)} className="cursor-pointer" opacity={sel === null || sel === i ? dim : 0.45}>
               <rect x={i * slot} y={0} width={slot} height={bottom} fill="transparent" />
-              <g transform={`translate(${bottom * LEAN},0) skewX(-8)`}>
+              <g transform={`translate(${bottom * tan},0) skewX(-8)`}>
                 {b.values.map((v, k) => {
                   const h = (v / max) * (bottom - 6)
                   y -= h

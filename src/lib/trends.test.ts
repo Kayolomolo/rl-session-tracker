@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { act, m, MIN, sess } from './testHelpers'
-import { notesList, rankHistory, weekStarts, weeklyTraining, weeklyVolume, weeklyWinRate } from './trends'
+import { activeNoteFilter, notesList, rankHistory, weekStarts, weeklyTraining, weeklyVolume, weeklyWinRate } from './trends'
 
 const W = (y: number, mo: number, d: number) => new Date(y, mo, d).getTime()
 const now = new Date(2026, 10, 12, 15).getTime()
@@ -70,4 +70,10 @@ describe('rankHistory', () => {
     expect(rankHistory([s], '2v2', 35).steps.map((p) => p.at)).toEqual([50])
     expect(rankHistory([], '3v3')).toEqual({ steps: [], mmr: [] })
   })
+})
+
+test('activeNoteFilter valt terug op alles als de activiteit geen notities meer heeft', () => {
+  expect(activeNoteFilter('Aerials', ['Aerials', 'Rings maps'])).toBe('Aerials')
+  expect(activeNoteFilter('Aerials', ['Rings maps'])).toBeNull()
+  expect(activeNoteFilter(null, ['Rings maps'])).toBeNull()
 })
