@@ -9,7 +9,7 @@ const shift = (week: number, n: number) => { const d = new Date(week); return ne
 
 export function weekStarts(now: number, range: Range, firstAt?: number): number[] {
   const current = startOfWeek(now)
-  let count = range === 'all' ? 4 : range
+  let count: number = range === 'all' ? 4 : range
   if (range === 'all' && firstAt !== undefined) {
     const first = startOfWeek(firstAt)
     let n = 1
