@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { act, m, MIN, sess } from './testHelpers'
-import { notesList, weekStarts, weeklyTraining, weeklyVolume, weeklyWinRate } from './trends'
+import { notesList, rankHistory, weekStarts, weeklyTraining, weeklyVolume, weeklyWinRate } from './trends'
 
 const W = (y: number, mo: number, d: number) => new Date(y, mo, d).getTime()
 const now = new Date(2026, 10, 12, 15).getTime()
@@ -51,5 +51,23 @@ describe('notesList', () => {
   })
   test('filter op activiteit', () => {
     expect(notesList([n], 'Aerials')).toEqual([{ id: n.activities[0].id, kind: 'training', type: 'Aerials', at: 100, note: 'Eerder flippen' }])
+  })
+})
+
+describe('rankHistory', () => {
+  const s = sess({ startedAt: 0, matches: [
+    { ...m('2v2', 'win', 10), rank: 'Champion I Div 2' }, { ...m('2v2', 'loss', 20), rank: 'Champion I Div 2' },
+    { ...m('1v1', 'win', 25), rank: 'Gold I Div 1' }, { ...m('2v2', 'win', 30), rank: 'Champion I Div 3' },
+    { ...m('2v2', 'win', 40), rank: 'Unranked' }, { ...m('2v2', 'win', 50), rank: 'Champion I Div 3', mmr: 1010 }, { ...m('2v2', 'win', 60), mmr: 1022 },
+  ] })
+  test('trapjes: veranderingen plus laatste punt, per modus', () => {
+    expect(rankHistory([s], '2v2').steps.map((p) => [p.at, p.label])).toEqual([[10, 'Champion I Div 2'], [30, 'Champion I Div 3'], [50, 'Champion I Div 3']])
+  })
+  test('MMR-punten', () => {
+    expect(rankHistory([s], '2v2').mmr).toEqual([{ at: 50, mmr: 1010 }, { at: 60, mmr: 1022 }])
+  })
+  test('since en lege invoer', () => {
+    expect(rankHistory([s], '2v2', 35).steps.map((p) => p.at)).toEqual([50])
+    expect(rankHistory([], '3v3')).toEqual({ steps: [], mmr: [] })
   })
 })

@@ -1,4 +1,5 @@
 import { activityMs, counts, sessionMs } from './stats'
+import { rankIndex } from './ranks'
 import { startOfWeek } from './time'
 import type { ActivityKind, Mode, Session } from './types'
 
@@ -60,4 +61,24 @@ export function notesList(sessions: Session[], type?: string): NoteItem[] {
     .filter((a) => a.note && (!type || a.type === type))
     .map((a) => ({ id: a.id, kind: a.kind, type: a.type, at: a.startedAt, note: a.note! }))
     .sort((a, b) => b.at - a.at)
+}
+
+export interface RankHistory { steps: { at: number; index: number; label: string }[]; mmr: { at: number; mmr: number }[] }
+
+export function rankHistory(sessions: Session[], mode: Mode, since?: number): RankHistory {
+  const matches = sessions
+    .flatMap((s) => s.matches)
+    .filter((x) => x.mode === mode && (since === undefined || x.playedAt >= since))
+    .sort((a, b) => a.playedAt - b.playedAt)
+  const steps: RankHistory['steps'] = []
+  let last: RankHistory['steps'][number] | undefined
+  for (const x of matches) {
+    const index = x.rank ? rankIndex(x.rank) : null
+    if (index === null || !x.rank) continue
+    last = { at: x.playedAt, index, label: x.rank }
+    if (steps.at(-1)?.index !== index) steps.push(last)
+  }
+  if (last && steps.at(-1) !== last) steps.push(last)
+  const mmr = matches.filter((x) => x.mmr !== undefined).map((x) => ({ at: x.playedAt, mmr: x.mmr! }))
+  return { steps, mmr }
 }

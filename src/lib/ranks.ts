@@ -16,3 +16,12 @@ export function rankLabel(r?: RankEntry): string {
   if (!r) return 'Unranked'
   return hasDivisions(r.tier) && r.division ? `${r.tier} Div ${r.division}` : r.tier
 }
+
+/** Oplopend getal voor een rank-label: Bronze I Div 1 = 0, +1 per divisie; Unranked of onbekend = null. */
+export function rankIndex(label: string): number | null {
+  const match = /^(.*?)(?: Div ([1-4]))?$/.exec(label.trim())
+  if (!match) return null
+  const tier = RANK_TIERS.indexOf(match[1])
+  if (tier <= 0) return null
+  return (tier - 1) * 4 + (match[2] ? Number(match[2]) - 1 : 0)
+}

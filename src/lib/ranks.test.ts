@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { hasDivisions, RANK_TIERS, rankLabel } from './ranks'
+import { hasDivisions, RANK_TIERS, rankIndex, rankLabel } from './ranks'
 
 test('rank-lijst loopt van Unranked tot Supersonic Legend', () => {
   expect(RANK_TIERS[0]).toBe('Unranked')
@@ -17,4 +17,15 @@ test('rankLabel', () => {
   expect(rankLabel({ tier: 'Supersonic Legend' })).toBe('Supersonic Legend')
   expect(rankLabel({ tier: 'Supersonic Legend', division: 2 })).toBe('Supersonic Legend')
   expect(rankLabel(undefined)).toBe('Unranked')
+})
+
+test('rankIndex: oplopend getal per divisie', () => {
+  expect(rankIndex('Bronze I Div 1')).toBe(0)
+  expect(rankIndex('Bronze I Div 4')).toBe(3)
+  expect(rankIndex('Bronze II Div 1')).toBe(4)
+  expect(rankIndex('Champion II Div 3')).toBe(66)
+  expect(rankIndex('Supersonic Legend')).toBe(84)
+  expect(rankIndex('Gold I')).toBe(24)
+  expect(rankIndex('Unranked')).toBeNull()
+  expect(rankIndex('Onzin')).toBeNull()
 })
