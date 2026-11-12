@@ -41,3 +41,8 @@ export function formatTime(ts: number): string {
   const d = new Date(ts)
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
+
+export function startOfMonth(ts: number): number {
+  const d = new Date(ts)
+  return new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+}
