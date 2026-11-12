@@ -36,9 +36,9 @@ export function Home() {
 
   return (
     <>
-      <section className="relative -mx-4 -mt-[calc(16px+env(safe-area-inset-top))] flex min-h-[clamp(196px,50vw,250px)] flex-col justify-between overflow-hidden px-4 pb-2 pt-[calc(14px+env(safe-area-inset-top))]">
+      <section className="relative -mx-4 -mt-[calc(16px+env(safe-area-inset-top))] flex min-h-[clamp(196px,50vw,250px)] flex-col justify-between overflow-hidden px-4 pb-6 pt-[calc(14px+env(safe-area-inset-top))]">
         <img src="theme/hero.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#050c1c]/70 to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[calc(104px+env(safe-area-inset-top))] bg-gradient-to-b from-[#050c1c]/75 to-transparent" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-[#050c1c]" />
       <header className="relative flex items-center gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-blue bg-[#071733]/90 font-display text-xl font-bold italic shadow-[0_0_14px_rgb(30_139_255/.7)]">{profile.name.charAt(0).toUpperCase()}</div>
