@@ -1,11 +1,12 @@
 import { IconCircleCheck } from '@tabler/icons-react'
 import { goalTitle, type Goal, type GoalProgress } from '../lib/goals'
+import { RankIcon } from './RankIcon'
 
 export function GoalRow({ goal, progress, history, onClick }: { goal: Goal; progress: GoalProgress; history?: boolean[] | null; onClick?: () => void }) {
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="font-display text-base font-bold uppercase italic leading-tight">{goalTitle(goal.config)}</p>
+        <p className="flex items-center gap-1.5 font-display text-base font-bold uppercase italic leading-tight">{goal.config.kind === 'rank' && <RankIcon label={goal.config.tier} size={24} />}{goalTitle(goal.config)}</p>
         {progress.done && <IconCircleCheck size={20} className="shrink-0 text-blue-text" aria-label="Gehaald" />}
       </div>
       <p className={`mt-0.5 text-xs ${progress.done ? 'text-blue-text' : 'text-muted'}`}>{progress.label}</p>

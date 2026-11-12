@@ -4,8 +4,9 @@ import { Heading, Label } from '../components/Label'
 import { SkewButton } from '../components/SkewButton'
 import { signOut } from '../db/auth'
 import { useData } from '../db/dataContext'
-import { hasDivisions, RANK_TIERS } from '../lib/ranks'
+import { hasDivisions, RANK_TIERS, rankLabel } from '../lib/ranks'
 import { MODES, type Mode, type RankEntry } from '../lib/types'
+import { RankIcon } from '../components/RankIcon'
 
 const field = 'rounded-xl border border-rl-line bg-rl-nav px-3 py-2.5 text-ink outline-none focus:border-blue'
 
@@ -39,7 +40,7 @@ export function ProfilePage() {
           const r = profile.ranks[m] ?? { tier: 'Unranked' }
           return (
             <div key={m} className="space-y-2">
-              <span className="font-display text-lg font-bold italic">{m}</span>
+              <div className="flex items-center gap-2"><RankIcon label={rankLabel(r)} size={36} /><span className="font-display text-lg font-bold italic">{m}</span><span className="truncate text-xs text-muted">{rankLabel(r)}</span></div>
               <div className="flex gap-2">
                 <select aria-label={`Rank ${m}`} className={`${field} min-w-0 flex-1`} value={r.tier} onChange={(e) => setRank(m, { tier: e.target.value })}>
                   {RANK_TIERS.map((t) => <option key={t} value={t}>{t}</option>)}

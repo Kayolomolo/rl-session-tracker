@@ -25,3 +25,11 @@ export function rankIndex(label: string): number | null {
   if (tier <= 0) return null
   return (tier - 1) * 4 + (match[2] ? Number(match[2]) - 1 : 0)
 }
+
+/** Pad naar het rank-icoon (in public/ranks/) voor een tier of label met divisie; Unranked of onbekend = null. */
+export function rankIcon(label: string): string | null {
+  const tier = label.trim().replace(/ Div [1-4]$/, '')
+  if (tier === 'Unranked' || !RANK_TIERS.includes(tier)) return null
+  const slug = tier.toLowerCase().replace(/ (i{1,3})$/, (_, n: string) => `-${n.length}`).replace(/ /g, '-')
+  return `ranks/${slug}.png`
+}

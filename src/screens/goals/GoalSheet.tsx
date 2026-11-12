@@ -8,6 +8,7 @@ import { activityOptions } from '../../lib/activities'
 import { validateGoal, type Goal, type GoalConfig, type GoalTarget } from '../../lib/goals'
 import { hasDivisions, RANK_TIERS } from '../../lib/ranks'
 import { MODES, type Mode } from '../../lib/types'
+import { RankIcon } from '../../components/RankIcon'
 
 type Kind = GoalConfig['kind']
 const KINDS: { value: Kind; label: string; sub: string }[] = [
@@ -102,12 +103,13 @@ export function GoalSheet({ open, goal, onClose }: { open: boolean; goal?: Goal;
           {config.kind === 'rank' && (
             <>
               {modePicker(config.mode)}
-              <div className="flex gap-2">
-                <select aria-label="Rank" className={`${field} flex-1`} value={config.tier} onChange={(e) => set({ tier: e.target.value, division: hasDivisions(e.target.value) ? config.division ?? 1 : undefined })}>
+              <div className="flex items-center gap-2">
+                <RankIcon label={config.tier} size={40} />
+                <select aria-label="Rank" className={`${field} min-w-0 flex-1`} value={config.tier} onChange={(e) => set({ tier: e.target.value, division: hasDivisions(e.target.value) ? config.division ?? 1 : undefined })}>
                   {RANK_TIERS.filter((t) => t !== 'Unranked').map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
                 {hasDivisions(config.tier) && (
-                  <select aria-label="Divisie" className={`${field} w-28`} value={config.division ?? 1} onChange={(e) => set({ division: Number(e.target.value) })}>
+                  <select aria-label="Divisie" className={`${field} !w-28 shrink-0`} value={config.division ?? 1} onChange={(e) => set({ division: Number(e.target.value) })}>
                     {[1, 2, 3, 4].map((d) => <option key={d} value={d}>Div {d}</option>)}
                   </select>
                 )}

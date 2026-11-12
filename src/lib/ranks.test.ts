@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { hasDivisions, RANK_TIERS, rankIndex, rankLabel } from './ranks'
+import { hasDivisions, RANK_TIERS, rankIcon, rankIndex, rankLabel } from './ranks'
 
 test('rank-lijst loopt van Unranked tot Supersonic Legend', () => {
   expect(RANK_TIERS[0]).toBe('Unranked')
@@ -28,4 +28,19 @@ test('rankIndex: oplopend getal per divisie', () => {
   expect(rankIndex('Gold I')).toBe(24)
   expect(rankIndex('Unranked')).toBeNull()
   expect(rankIndex('Onzin')).toBeNull()
+})
+test('rankIcon geeft per rank het juiste plaatje', () => {
+  expect(rankIcon('Bronze I')).toBe('ranks/bronze-1.png')
+  expect(rankIcon('Grand Champion III')).toBe('ranks/grand-champion-3.png')
+  expect(rankIcon('Supersonic Legend')).toBe('ranks/supersonic-legend.png')
+})
+test('rankIcon gebruikt bij een divisie het icoon van de rank', () => {
+  expect(rankIcon('Champion II Div 3')).toBe('ranks/champion-2.png')
+})
+test('rankIcon geeft null bij Unranked of onbekend', () => {
+  expect(rankIcon('Unranked')).toBeNull()
+  expect(rankIcon('Mega Rank')).toBeNull()
+})
+test('elke rank behalve Unranked heeft een icoon', () => {
+  expect(RANK_TIERS.filter((t) => rankIcon(t) === null)).toEqual(['Unranked'])
 })

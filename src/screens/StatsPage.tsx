@@ -16,6 +16,7 @@ import { MODES, type Mode } from '../lib/types'
 import { volumeSummary, winSummary } from '../lib/summaries'
 import { InsightsCard } from './stats/InsightsCard'
 import { isRange, RANGE_OPTIONS, weekLabel } from './stats/ranges'
+import { RankIcon } from '../components/RankIcon'
 
 type ModeFilter = 'all' | Mode
 const MODE_OPTIONS: { value: ModeFilter; label: string }[] = [{ value: 'all', label: 'Alle' }, ...MODES.map((m) => ({ value: m as ModeFilter, label: m }))]
@@ -84,7 +85,7 @@ export function StatsPage() {
             points={ranks.steps.map((p) => ({ x: fmtDay(p.at), y: p.index, tip: `${fmtDay(p.at)} · ${p.label}` }))} />
         ) : <Empty text="Stel je rank in bij Profile, dan zie je hier je verloop." />}
         {ranks.steps.length > 0 && (
-          <p className="text-sm text-muted">{ranks.steps[0].label} → <span className="text-ink">{ranks.steps.at(-1)!.label}</span></p>
+          <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted"><RankIcon label={ranks.steps[0].label} size={22} />{ranks.steps[0].label} → <RankIcon label={ranks.steps.at(-1)!.label} size={22} /><span className="text-ink">{ranks.steps.at(-1)!.label}</span></p>
         )}
       </Card>
 

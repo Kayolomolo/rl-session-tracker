@@ -13,6 +13,7 @@ import { rankLabel } from '../lib/ranks'
 import { activityTotals, sessionMs, summarizeSession, todayCounts, totals } from '../lib/stats'
 import { dayStreak, winStreak } from '../lib/streaks'
 import { formatClock, formatDate, formatDuration, startOfWeek } from '../lib/time'
+import { RankIcon } from '../components/RankIcon'
 
 export function Home() {
   const { profile, sessions, active, actions, goals } = useData()
@@ -36,7 +37,7 @@ export function Home() {
         <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-blue bg-rl-card font-display text-xl font-bold italic">{profile.name.charAt(0).toUpperCase()}</div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-xl font-bold uppercase italic leading-tight">{profile.name}</p>
-          <p className="text-xs text-blue-text">{rankLabel(profile.ranks[profile.lastMode])} · {profile.lastMode}</p>
+          <p className="flex items-center gap-1 text-xs text-blue-text"><RankIcon label={rankLabel(profile.ranks[profile.lastMode])} size={20} /><span className="truncate">{rankLabel(profile.ranks[profile.lastMode])} · {profile.lastMode}</span></p>
         </div>
         <div className="text-right">
           <div className="inline-flex -skew-x-12 items-center rounded-lg border border-orange bg-[#2a1a0a] px-3 py-1">
