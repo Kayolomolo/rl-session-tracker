@@ -4,6 +4,8 @@ import { DataContext, type Ready } from './db/dataContext'
 import { useMyData } from './db/useMyData'
 import { Layout, Placeholder } from './screens/Layout'
 import { Home } from './screens/Home'
+import { IdleDialog } from './screens/IdleDialog'
+import { SessionScreen } from './screens/SessionScreen'
 import { Login } from './screens/Login'
 import { Onboarding } from './screens/Onboarding'
 
@@ -27,7 +29,7 @@ function Gate() {
     <DataContext.Provider value={data as Ready}>
       <HashRouter>
         <Routes>
-          <Route path="/session" element={<Placeholder title="Sessie" />} />
+          <Route path="/session" element={<SessionScreen />} />
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="/sessions" element={<Placeholder title="Sessions" />} />
@@ -37,6 +39,7 @@ function Gate() {
             <Route path="/profile" element={<Placeholder title="Profile" />} />
           </Route>
         </Routes>
+        <IdleDialog />
       </HashRouter>
     </DataContext.Provider>
   )

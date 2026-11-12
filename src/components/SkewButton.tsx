@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 
 type Variant = 'blue' | 'orange' | 'light' | 'ghost'
 const VARIANTS: Record<Variant, string> = {
@@ -20,16 +20,24 @@ interface Props {
 }
 
 export function SkewButton({ variant, size = 'md', onClick, disabled, children, className = '', ariaLabel }: Props) {
-  const [pulse, setPulse] = useState(0)
+  const ref = useRef<HTMLButtonElement>(null)
+  const pulse = () => {
+    const el = ref.current
+    if (!el) return
+    el.classList.remove('anim-pulse')
+    void el.offsetWidth
+    el.classList.add('anim-pulse')
+  }
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={ariaLabel}
       disabled={disabled}
-      onClick={() => { setPulse((p) => p + 1); onClick?.() }}
+      onClick={() => { pulse(); onClick?.() }}
       className={`-skew-x-12 rounded-lg font-display font-bold uppercase italic tracking-wide transition active:scale-[0.97] disabled:opacity-60 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
     >
-      <span key={pulse} className={`flex skew-x-12 items-center justify-center gap-2 ${pulse ? 'anim-pulse rounded-lg' : ''}`}>{children}</span>
+      <span className="flex skew-x-12 items-center justify-center gap-2">{children}</span>
     </button>
   )
 }
