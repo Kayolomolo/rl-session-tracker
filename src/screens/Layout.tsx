@@ -11,7 +11,3 @@ export function Layout() {
     </>
   )
 }
-
-export function Placeholder({ title }: { title: string }) {
-  return <h1 className="font-display text-4xl font-bold uppercase italic">{title}</h1>
-}

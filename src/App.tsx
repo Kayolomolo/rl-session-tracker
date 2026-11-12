@@ -2,7 +2,12 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 import { hasConfig } from './db/supabase'
 import { DataContext, type Ready } from './db/dataContext'
 import { useMyData } from './db/useMyData'
-import { Layout, Placeholder } from './screens/Layout'
+import { Layout } from './screens/Layout'
+import { ProfilePage } from './screens/ProfilePage'
+import { SessionOverview } from './screens/SessionOverview'
+import { SessionsList } from './screens/SessionsList'
+import { StatsPage } from './screens/StatsPage'
+import { TrainingPage } from './screens/TrainingPage'
 import { Home } from './screens/Home'
 import { IdleDialog } from './screens/IdleDialog'
 import { SessionScreen } from './screens/SessionScreen'
@@ -32,11 +37,11 @@ function Gate() {
           <Route path="/session" element={<SessionScreen />} />
           <Route element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="/sessions" element={<Placeholder title="Sessions" />} />
-            <Route path="/sessions/:id" element={<Placeholder title="Overzicht" />} />
-            <Route path="/training" element={<Placeholder title="Training" />} />
-            <Route path="/stats" element={<Placeholder title="Stats" />} />
-            <Route path="/profile" element={<Placeholder title="Profile" />} />
+            <Route path="/sessions" element={<SessionsList />} />
+            <Route path="/sessions/:id" element={<SessionOverview />} />
+            <Route path="/training" element={<TrainingPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Routes>
         <IdleDialog />
