@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 export function Label({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <p className={`text-[11px] font-medium uppercase tracking-[0.12em] text-muted ${className}`}>{children}</p>
+  return <p className={`font-display text-[13px] font-bold uppercase italic tracking-[0.12em] text-[#9db8e6] ${className}`}>{children}</p>
 }
 
 export function Heading({ children, className = '' }: { children: ReactNode; className?: string }) {

@@ -1,4 +1,4 @@
-import { IconChevronsRight, IconFlame } from '@tabler/icons-react'
+import { IconBarbell, IconChevronsRight, IconClock, IconFlame, IconTarget } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
 import { useData } from '../db/dataContext'
 import { BoostMeter } from '../components/BoostMeter'
@@ -29,65 +29,77 @@ export function Home() {
   const weekMs = weekly.reduce((s, a) => s + a.ms, 0)
   const all = totals(sessions, now)
 
+  const activeGoals = goals.filter(isActiveGoal)
+  const rankGoal = activeGoals.map((g) => g.config).find((c) => c.kind === 'rank')
+
   const start = () => { actions.startSession(); navigate('/session') }
 
   return (
     <>
-      <header className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-blue bg-rl-card font-display text-xl font-bold italic">{profile.name.charAt(0).toUpperCase()}</div>
+      <section className="relative -mx-4 -mt-[calc(16px+env(safe-area-inset-top))] flex min-h-[clamp(196px,50vw,250px)] flex-col justify-between overflow-hidden px-4 pb-2 pt-[calc(14px+env(safe-area-inset-top))]">
+        <img src="theme/hero.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#050c1c]/70 to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-[#050c1c]" />
+      <header className="relative flex items-center gap-3">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-blue bg-[#071733]/90 font-display text-xl font-bold italic shadow-[0_0_14px_rgb(30_139_255/.7)]">{profile.name.charAt(0).toUpperCase()}</div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-xl font-bold uppercase italic leading-tight">{profile.name}</p>
           <p className="flex items-center gap-1 text-xs text-blue-text"><RankIcon label={rankLabel(profile.ranks[profile.lastMode])} size={20} /><span className="truncate">{rankLabel(profile.ranks[profile.lastMode])} · {profile.lastMode}</span></p>
         </div>
         <div className="text-right">
-          <div className="inline-flex -skew-x-12 items-center rounded-lg border border-orange bg-[#2a1a0a] px-3 py-1">
+          <div className="inline-flex -skew-x-12 items-center rounded-lg border border-orange bg-[#2a1a0a]/90 px-3 py-1 shadow-[0_0_14px_rgb(255_122_26/.55)]">
             <span className="flex skew-x-12 items-center gap-1 font-display font-bold italic text-orange-text"><IconFlame size={18} aria-hidden="true" />{days} {days === 1 ? 'dag' : 'dagen'}</span>
           </div>
-          <p className="mt-1 text-[11px] text-muted">{wins} {wins === 1 ? 'win' : 'wins'} op rij</p>
+          <p className="mt-1 text-[11px] text-[#c6d4ee]">{wins} {wins === 1 ? 'win' : 'wins'} op rij</p>
         </div>
       </header>
 
       {active ? (
-        <SkewButton variant="blue" size="lg" className="w-full !py-6" onClick={() => navigate('/session')}>
+        <SkewButton variant="blue" size="lg" className="relative mx-auto w-[88%] !py-4" onClick={() => navigate('/session')}>
           <span className="text-2xl">Ga verder · {formatClock(sessionMs(active, now))}</span><IconChevronsRight aria-hidden="true" />
         </SkewButton>
       ) : (
-        <SkewButton variant="blue" size="lg" className="w-full !py-6" onClick={start}>
+        <SkewButton variant="blue" size="lg" className="relative mx-auto w-[88%] !py-4" onClick={start}>
           <span className="text-3xl">Start session</span><IconChevronsRight size={28} aria-hidden="true" />
         </SkewButton>
       )}
+      </section>
 
-      <Card className="flex items-center gap-4">
+      <Card glow="orange" className="relative flex items-center gap-4 overflow-hidden">
         <BoostMeter value={today.winRate} />
-        <div>
+        <img src="icon-192.png" alt="" aria-hidden="true" className="pointer-events-none absolute -right-2 top-1/2 h-24 w-24 -translate-y-1/2 opacity-25 [mask-image:radial-gradient(circle,black_40%,transparent_70%)]" />
+        <div className="relative">
           <Label>Vandaag</Label>
           <Heading className="mt-1 text-2xl">{today.played} {today.played === 1 ? 'game' : 'games'}</Heading>
           <p className="mt-1 text-sm"><span className="text-blue-text">{today.wins}W</span> · <span className="text-orange-text">{today.losses}L</span></p>
         </div>
       </Card>
 
-      <Card onClick={() => navigate('/goals')}>
-        <Label>Doelen</Label>
-        {goals.filter(isActiveGoal).length ? (
-          <div className="divide-y divide-rl-line">
-            {goals.filter(isActiveGoal).slice(0, 4).map((g) => <GoalRow key={g.id} goal={g} progress={goalProgress(g, sessions, profile, now)} />)}
-          </div>
-        ) : <p className="mt-1 text-sm text-blue-text">Stel je eerste doel</p>}
+      <Card glow="purple" onClick={() => navigate('/goals')} className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <Label><IconTarget size={18} aria-hidden="true" className="mr-1.5 inline align-[-4px]" />Doelen</Label>
+          {activeGoals.length ? (
+            <div className="divide-y divide-rl-line">
+              {activeGoals.slice(0, 4).map((g) => <GoalRow key={g.id} goal={g} progress={goalProgress(g, sessions, profile, now)} />)}
+            </div>
+          ) : <p className="mt-1 text-sm text-blue-text">Stel je eerste doel</p>}
+        </div>
+        {rankGoal && <RankIcon label={rankGoal.tier} size={76} className="drop-shadow-[0_0_10px_rgb(163_101_255/.8)]" />}
       </Card>
 
       {last && lastSum ? (
         <Card onClick={() => navigate(`/sessions/${last.id}`)}>
-          <Label>Laatste sessie · {formatDate(last.startedAt)}</Label>
+          <Label><IconClock size={18} aria-hidden="true" className="mr-1.5 inline align-[-4px]" />Laatste sessie · {formatDate(last.startedAt)}</Label>
           <Heading className="mb-3 mt-1 text-lg">{formatDuration(lastSum.durationMs)} · {lastSum.played} games · {lastSum.wins}W {lastSum.losses}L</Heading>
           <WinLossBar wins={lastSum.wins} losses={lastSum.losses} />
         </Card>
       ) : (
-        <Card><Label>Laatste sessie</Label><p className="mt-1 text-sm text-muted">Start je eerste sessie om hier je resultaten te zien.</p></Card>
+        <Card><Label><IconClock size={18} aria-hidden="true" className="mr-1.5 inline align-[-4px]" />Laatste sessie</Label><p className="mt-1 text-sm text-muted">Start je eerste sessie om hier je resultaten te zien.</p></Card>
       )}
 
       <Card>
         <div className="flex items-baseline justify-between">
-          <Label>Training deze week</Label>
+          <Label><IconBarbell size={18} aria-hidden="true" className="mr-1.5 inline align-[-4px]" />Training deze week</Label>
           <span className="font-display font-bold italic">{formatDuration(weekMs)}</span>
         </div>
         {weekly.length ? (

@@ -8,10 +8,10 @@ export function BoostMeter({ value, size = 84, label }: { value: number | null; 
   const c = 2 * Math.PI * r
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }} role="img" aria-label={value === null ? 'Nog geen winpercentage' : `Winpercentage ${value}%`}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-rl-line)" strokeWidth={stroke} />
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90 overflow-visible">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(255 122 26 / .14)" strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-orange)" strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={c * (1 - shown / 100)} style={{ transition: 'stroke-dashoffset .8s ease-out' }} />
+          strokeDasharray={c} strokeDashoffset={c * (1 - shown / 100)} style={{ transition: 'stroke-dashoffset .8s ease-out', filter: 'drop-shadow(0 0 5px rgb(255 122 26 / .9))' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-display font-bold italic leading-none" style={{ fontSize: size * 0.3 }}>{value === null ? '–' : value}</span>

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-rl-bg: #07101f;
+  --color-rl-bg: #050c1c;
   --color-rl-card: #0f1e36;
   --color-rl-line: #1a3157;
   --color-rl-nav: #0a1629;
@@ -17,11 +17,27 @@
 html, body, #root { min-height: 100%; }
 body {
   margin: 0;
-  background: var(--color-rl-bg);
+  background-color: var(--color-rl-bg);
+  background-image:
+    radial-gradient(120% 55% at 50% -8%, rgb(30 110 255 / .38), transparent 62%),
+    radial-gradient(90% 40% at 50% 108%, rgb(30 110 255 / .18), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='90'%3E%3Cpath d='M26 0 52 15v30L26 60 0 45V15zM26 60v30' fill='none' stroke='%235fa8ff' stroke-opacity='.07' stroke-width='1'/%3E%3C/svg%3E");
+  background-attachment: fixed, fixed, fixed;
   color: var(--color-ink);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Neon-thema: glas-kaarten met gloedrand per kleur */
+.glass {
+  background: linear-gradient(180deg, rgb(18 38 78 / .80), rgb(8 18 42 / .86));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.glow-blue { border: 1.5px solid rgb(61 139 255 / .85); box-shadow: 0 0 16px rgb(30 139 255 / .35), inset 0 0 22px rgb(30 139 255 / .10); }
+.glow-orange { border: 1.5px solid rgb(255 138 42 / .9); box-shadow: 0 0 16px rgb(255 122 26 / .38), inset 0 0 22px rgb(255 122 26 / .10); }
+.glow-purple { border: 1.5px solid rgb(163 101 255 / .9); box-shadow: 0 0 16px rgb(150 90 255 / .40), inset 0 0 22px rgb(150 90 255 / .12); }
+.glow-strong { box-shadow: 0 0 26px rgb(30 139 255 / .6), inset 0 0 26px rgb(30 139 255 / .18); }
 
 @keyframes boost-pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / .45); } 100% { box-shadow: 0 0 0 14px rgb(255 255 255 / 0); } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
