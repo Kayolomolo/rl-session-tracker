@@ -29,3 +29,15 @@ export function startOfWeek(ts: number): number {
   const offset = (d.getDay() + 6) % 7
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() - offset).getTime()
 }
+
+export function formatDate(ts: number): string {
+  const d = new Date(ts)
+  const wd = d.toLocaleDateString('nl-NL', { weekday: 'short' }).replace('.', '')
+  const mon = d.toLocaleDateString('nl-NL', { month: 'short' }).replace('.', '')
+  return `${wd} ${d.getDate()} ${mon}`
+}
+
+export function formatTime(ts: number): string {
+  const d = new Date(ts)
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}

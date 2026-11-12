@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { dayKey, durationMs, formatClock, formatDuration, startOfWeek } from './time'
+import { dayKey, durationMs, formatClock, formatDate, formatDuration, formatTime, startOfWeek } from './time'
 
 describe('time', () => {
   test('formatClock toont u:mm:ss', () => {
@@ -24,5 +24,14 @@ describe('time', () => {
     expect(startOfWeek(new Date(2026, 10, 12, 15, 0).getTime())).toBe(new Date(2026, 10, 9).getTime())
     expect(startOfWeek(new Date(2026, 10, 15, 23, 0).getTime())).toBe(new Date(2026, 10, 9).getTime())
     expect(startOfWeek(new Date(2026, 10, 9, 0, 0).getTime())).toBe(new Date(2026, 10, 9).getTime())
+  })
+})
+
+describe('datum en tijd', () => {
+  test('formatDate in het Nederlands', () => {
+    expect(formatDate(new Date(2026, 10, 12, 21, 4).getTime())).toBe('do 12 nov')
+  })
+  test('formatTime als uu:mm', () => {
+    expect(formatTime(new Date(2026, 10, 12, 9, 4).getTime())).toBe('09:04')
   })
 })
