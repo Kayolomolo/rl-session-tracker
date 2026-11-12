@@ -15,6 +15,6 @@ export function useAuth(): AuthState {
   return state
 }
 
-export const sendCode = (email: string) => supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
-export const verifyCode = (email: string, token: string) => supabase.auth.verifyOtp({ email, token, type: 'email' })
+export const signIn = (email: string, password: string) => supabase.auth.signInWithPassword({ email, password })
+export const signUp = (email: string, password: string) => supabase.auth.signUp({ email, password })
 export const signOut = () => supabase.auth.signOut()
