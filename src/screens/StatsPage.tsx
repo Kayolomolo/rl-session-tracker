@@ -14,6 +14,7 @@ import { formatDuration } from '../lib/time'
 import { rankHistory, weekStarts, weeklyVolume, weeklyWinRate, type Range } from '../lib/trends'
 import { MODES, type Mode } from '../lib/types'
 import { volumeSummary, winSummary } from '../lib/summaries'
+import { InsightsCard } from './stats/InsightsCard'
 import { isRange, RANGE_OPTIONS, weekLabel } from './stats/ranges'
 
 type ModeFilter = 'all' | Mode
@@ -46,6 +47,7 @@ export function StatsPage() {
   return (
     <>
       <Heading className="text-4xl">Stats</Heading>
+      <InsightsCard sessions={sessions} now={now} />
       <RangePicker value={range} options={RANGE_OPTIONS} onChange={setRange} />
 
       <Card className="space-y-3">

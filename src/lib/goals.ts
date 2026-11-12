@@ -14,6 +14,7 @@ export interface Goal { id: string; config: GoalConfig; createdAt: number; achie
 export interface GoalProgress { current: number; target: number; ratio: number; label: string; done: boolean; needMore?: number }
 
 export const MAX_ACTIVE_GOALS = 8
+export const isActiveGoal = (g: Goal) => !g.archivedAt && !g.achievedAt
 const MIN = 60_000
 
 const nextWeek = (week: number) => { const d = new Date(week); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7).getTime() }

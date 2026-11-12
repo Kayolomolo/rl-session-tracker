@@ -9,6 +9,8 @@ import { SessionOverview } from './screens/SessionOverview'
 import { SessionsList } from './screens/SessionsList'
 import { StatsPage } from './screens/StatsPage'
 import { TrainingPage } from './screens/TrainingPage'
+import { AchievementWatcher } from './db/AchievementWatcher'
+import { GoalsPage } from './screens/GoalsPage'
 import { Home } from './screens/Home'
 import { IdleDialog } from './screens/IdleDialog'
 import { SessionScreen } from './screens/SessionScreen'
@@ -36,6 +38,7 @@ function Gate() {
       <HashRouter>
         <Routes>
           <Route path="/session" element={<SessionScreen />} />
+          <Route path="/goals" element={<GoalsPage />} />
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="/sessions" element={<SessionsList />} />
@@ -46,6 +49,7 @@ function Gate() {
           </Route>
         </Routes>
         <IdleDialog />
+        <AchievementWatcher />
         <OfflineBadge online={data.online} pending={data.pending} dropped={data.dropped} />
       </HashRouter>
     </DataContext.Provider>

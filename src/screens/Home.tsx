@@ -5,15 +5,17 @@ import { BoostMeter } from '../components/BoostMeter'
 import { Card } from '../components/Card'
 import { Heading, Label } from '../components/Label'
 import { SkewButton } from '../components/SkewButton'
+import { GoalRow } from '../components/GoalRow'
 import { WinLossBar } from '../components/WinLossBar'
 import { useNow } from '../hooks/useNow'
+import { goalProgress, isActiveGoal } from '../lib/goals'
 import { rankLabel } from '../lib/ranks'
 import { activityTotals, sessionMs, summarizeSession, todayCounts, totals } from '../lib/stats'
 import { dayStreak, winStreak } from '../lib/streaks'
 import { formatClock, formatDate, formatDuration, startOfWeek } from '../lib/time'
 
 export function Home() {
-  const { profile, sessions, active, actions } = useData()
+  const { profile, sessions, active, actions, goals } = useData()
   const navigate = useNavigate()
   const now = useNow(1000)
   const days = dayStreak(sessions.map((s) => s.startedAt), now)
@@ -61,6 +63,15 @@ export function Home() {
           <Heading className="mt-1 text-2xl">{today.played} {today.played === 1 ? 'game' : 'games'}</Heading>
           <p className="mt-1 text-sm"><span className="text-blue-text">{today.wins}W</span> · <span className="text-orange-text">{today.losses}L</span></p>
         </div>
+      </Card>
+
+      <Card onClick={() => navigate('/goals')}>
+        <Label>Doelen</Label>
+        {goals.filter(isActiveGoal).length ? (
+          <div className="divide-y divide-rl-line">
+            {goals.filter(isActiveGoal).slice(0, 4).map((g) => <GoalRow key={g.id} goal={g} progress={goalProgress(g, sessions, profile, now)} />)}
+          </div>
+        ) : <p className="mt-1 text-sm text-blue-text">Stel je eerste doel</p>}
       </Card>
 
       {last && lastSum ? (
