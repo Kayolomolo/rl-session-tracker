@@ -1,15 +1,16 @@
-import { useEffect } from 'react'
-import { goalProgress } from '../lib/goals'
+import { useEffect, useRef } from 'react'
+import { goalsToMark } from '../lib/goals'
 import { useData } from './dataContext'
 
-/** Zet eenmalig 'gehaald' op rank- en MMR-doelen zodra ze gehaald zijn. */
+/** Zet eenmalig 'gehaald' op rank- en MMR-doelen zodra ze gehaald zijn (per doel maximaal één keer per app-sessie). */
 export function AchievementWatcher() {
   const { goals, sessions, profile, actions } = useData()
+  const marked = useRef(new Set<string>())
   useEffect(() => {
     const now = Date.now()
-    for (const g of goals) {
-      if (g.archivedAt || g.achievedAt || (g.config.kind !== 'rank' && g.config.kind !== 'mmr')) continue
-      if (goalProgress(g, sessions, profile, now).done) actions.markAchieved(g, now)
+    for (const g of goalsToMark(goals, sessions, profile, now, marked.current)) {
+      marked.current.add(g.id)
+      actions.markAchieved(g, now)
     }
   }, [goals, sessions, profile, actions])
   return null

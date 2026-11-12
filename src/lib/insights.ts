@@ -57,8 +57,9 @@ export function warmupEffect(sessions: Session[]): Insight {
   }
   const a = counts(withW.flatMap((s) => s.matches)).winRate ?? 0
   const b = counts(without.flatMap((s) => s.matches)).winRate ?? 0
-  if (a >= b) return { ok: true, text: `Met warm-up win je ${a - b}% vaker (${a}% tegen ${b}%).` }
-  return { ok: true, text: `Zonder warm-up win je ${b - a}% vaker (${b}% tegen ${a}%).` }
+  if (a === b) return { ok: true, text: `Met en zonder warm-up win je even vaak (${a}%).` }
+  if (a > b) return { ok: true, text: `Met warm-up win je ${a - b} procentpunt vaker (${a}% tegen ${b}%).` }
+  return { ok: true, text: `Zonder warm-up win je ${b - a} procentpunt vaker (${b}% tegen ${a}%).` }
 }
 
 export function records(sessions: Session[], now: number): Records | null {

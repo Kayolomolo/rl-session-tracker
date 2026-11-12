@@ -129,3 +129,11 @@ export function goalTitle(c: GoalConfig): string {
 }
 
 export const ALL_ACTIVITY_TYPES = [...DEFAULT_ACTIVITIES.warmup, ...DEFAULT_ACTIVITIES.training]
+
+/** Rank- en MMR-doelen die nu gehaald zijn maar nog niet gemarkeerd; `skip` voorkomt herhaald markeren in deze sessie. */
+export function goalsToMark(goals: Goal[], sessions: Session[], profile: Profile, now: number, skip: Set<string>): Goal[] {
+  return goals.filter((g) =>
+    !g.archivedAt && !g.achievedAt && !skip.has(g.id) &&
+    (g.config.kind === 'rank' || g.config.kind === 'mmr') &&
+    goalProgress(g, sessions, profile, now).done)
+}

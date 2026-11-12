@@ -35,11 +35,15 @@ describe('warmupEffect', () => {
   const without = (i: number, wins: number) => sess({ startedAt: i, matches: games('2v2', 10, wins, i) })
   test('met warm-up beter', () => {
     const all = [0, 1, 2, 3, 4].map((i) => withW(i * 100, 6)).concat([5, 6, 7, 8, 9].map((i) => without(i * 100, i === 5 ? 5 : 4) ))
-    expect(warmupEffect(all)).toEqual({ ok: true, text: 'Met warm-up win je 18% vaker (60% tegen 42%).' })
+    expect(warmupEffect(all)).toEqual({ ok: true, text: 'Met warm-up win je 18 procentpunt vaker (60% tegen 42%).' })
   })
   test('zonder warm-up beter', () => {
     const all = [0, 1, 2, 3, 4].map((i) => withW(i * 100, 4)).concat([5, 6, 7, 8, 9].map((i) => without(i * 100, 5)))
-    expect(warmupEffect(all)).toEqual({ ok: true, text: 'Zonder warm-up win je 10% vaker (50% tegen 40%).' })
+    expect(warmupEffect(all)).toEqual({ ok: true, text: 'Zonder warm-up win je 10 procentpunt vaker (50% tegen 40%).' })
+  })
+  test('geen verschil', () => {
+    const all = [0, 1, 2, 3, 4].map((i) => withW(i * 100, 5)).concat([5, 6, 7, 8, 9].map((i) => without(i * 100, 5)))
+    expect(warmupEffect(all)).toEqual({ ok: true, text: 'Met en zonder warm-up win je even vaak (50%).' })
   })
   test('te weinig sessies', () => {
     const all = [0, 1, 2, 3, 4].map((i) => withW(i * 100, 6)).concat([5, 6, 7].map((i) => without(i * 100, 4)))

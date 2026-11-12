@@ -92,3 +92,12 @@ describe('sync-engine', () => {
     expect(e.state().store.sessions.find((s) => s.id === 'new')?.endedAt).toBeUndefined()
   })
 })
+
+test('oude cache zonder doelen krijgt een lege doelenlijst', () => {
+  const t: Transport = { fetchAll: async () => server(), send: async () => ({ error: null }) }
+  const old = { store: { sessions: [sess({ id: 'x' })] }, queue: [] } as unknown as Cache
+  const e = createSyncEngine(t, memoryStorage(old), () => {})
+  expect(e.state().store.goals).toEqual([])
+  e.dispatch({ t: 'goal', row: { id: 'g', createdAt: 1, config: { kind: 'mmr', mode: '2v2', mmr: 900 } } })
+  expect(e.state().store.goals.map((g) => g.id)).toEqual(['g'])
+})

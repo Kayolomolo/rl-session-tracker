@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { currentMmr, goalProgress, goalTitle, validateGoal, weekHistory, type Goal, type GoalConfig } from './goals'
+import { currentMmr, goalProgress, goalsToMark, goalTitle, validateGoal, weekHistory, type Goal, type GoalConfig } from './goals'
 import { act, m, MIN, profile, sess } from './testHelpers'
 
 const W = (y: number, mo: number, d: number) => new Date(y, mo, d).getTime()
@@ -70,4 +70,13 @@ test('validatie en titels', () => {
   expect(validateGoal({ kind: 'mmr', mode: '2v2', mmr: 0 })).toBe('Kies een MMR van 1 tot 3000.')
   expect(goalTitle({ kind: 'training', target: { kind: 'activity', type: 'Aerials' }, count: 'times', minutes: 15, times: 3 })).toBe('Aerials · 3× 15 min per week')
   expect(goalTitle({ kind: 'winrate', mode: '2v2', percent: 55, period: 'month', minGames: 10 })).toBe('2v2 · 55% winst deze maand')
+})
+
+describe('goalsToMark', () => {
+  const p = profile({ ranks: { '2v2': { tier: 'Champion I', division: 2 } } })
+  const rank = (id: string, extra: Partial<Goal> = {}): Goal => ({ id, createdAt: 0, config: { kind: 'rank', mode: '2v2', tier: 'Champion I', division: 1 }, ...extra })
+  test('alleen gehaalde, actieve rank/MMR-doelen die nog niet gemarkeerd zijn', () => {
+    const goals = [rank('a'), rank('b', { achievedAt: 5 }), rank('c', { archivedAt: 5 }), { id: 'd', createdAt: 0, config: { kind: 'training', target: { kind: 'warmup' }, count: 'minutes', minutes: 5 } } as Goal, rank('e')]
+    expect(goalsToMark(goals, [], p, now, new Set(['e'])).map((g) => g.id)).toEqual(['a'])
+  })
 })
