@@ -14,6 +14,7 @@ export interface MyData {
   active?: Session
   actions?: Actions
   pending: number
+  dropped: number
   online: boolean
 }
 
@@ -22,7 +23,7 @@ export function useMyData(): MyData {
   const sync = useSync(auth.user?.id)
   const userId = auth.user?.id
   const actions = useMemo(() => (userId ? makeActions(sync.dispatch, sync.getStore, userId) : undefined), [userId, sync.dispatch, sync.getStore])
-  const base = { pending: sync.pending, online: sync.online, sessions: sync.store.sessions }
+  const base = { pending: sync.pending, dropped: sync.dropped, online: sync.online, sessions: sync.store.sessions }
   if (auth.loading) return { ...base, isLoading: true }
   if (!auth.user) return { ...base, isLoading: false }
   if (!sync.loaded) return { ...base, isLoading: true, user: auth.user }

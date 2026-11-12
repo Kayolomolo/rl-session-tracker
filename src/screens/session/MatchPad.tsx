@@ -47,7 +47,7 @@ export function MatchPad({ session }: { session: Session }) {
         <SkewButton variant="orange" size="xl" disabled={locked} onClick={() => log('loss')}>Loss</SkewButton>
       </div>
       {toast && (
-        <Toast message={toast.label} actionLabel="Ongedaan maken" onAction={undo} onClose={close} durationMs={profile.askMmr ? 15000 : 5000}>
+        <Toast key={toast.id} message={toast.label} actionLabel="Ongedaan maken" onAction={undo} onClose={close} durationMs={profile.askMmr ? 15000 : 5000}>
           {profile.askMmr && (
             <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); saveMmr() }}>
               <input inputMode="numeric" placeholder="MMR (optioneel)" value={mmr} onChange={(e) => setMmr(e.target.value.replace(/\D/g, ''))}

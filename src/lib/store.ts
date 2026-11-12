@@ -44,10 +44,13 @@ export function rebase(server: Store, pending: Op[]): Store {
   return pending.reduce(applyOp, server)
 }
 
-/** Definitief = de server weigert het verzoek inhoudelijk; opnieuw proberen helpt niet. */
+const TRANSIENT_STATUS = new Set([401, 408, 429])
+const PERMANENT_CODE = /^(23\w{3}|22\w{3}|42\w{3}|PGRST[12]\d\d)$/
+
+/** Definitief = de server weigert het verzoek inhoudelijk; opnieuw proberen helpt niet. Bij twijfel: tijdelijk. */
 export function isPermanentError(err: { code?: string; status?: number } | null): boolean {
   if (!err) return false
-  if (err.status === 401) return false
-  if (err.code && /^([0-9A-Z]{5}|PGRST\d+)$/.test(err.code)) return true
-  return err.status !== undefined && err.status >= 400 && err.status < 500
+  const { status, code } = err
+  if (status !== undefined && (status === 0 || status >= 500 || TRANSIENT_STATUS.has(status))) return false
+  return !!code && PERMANENT_CODE.test(code)
 }

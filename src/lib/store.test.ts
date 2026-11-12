@@ -58,18 +58,31 @@ test('rebase past wachtende wijzigingen toe op serverdata', () => {
 })
 
 describe('isPermanentError', () => {
-  test('netwerkfout is tijdelijk', () => {
+  test('netwerkfout en serverfouten zijn tijdelijk', () => {
     expect(isPermanentError({ code: '', status: 0 })).toBe(false)
     expect(isPermanentError({})).toBe(false)
     expect(isPermanentError({ status: 503 })).toBe(false)
+    expect(isPermanentError({ code: 'PGRST002', status: 503 })).toBe(false)
+    expect(isPermanentError({ code: 'PGRST000', status: 503 })).toBe(false)
   })
-  test('database- en verzoekfouten zijn definitief', () => {
-    expect(isPermanentError({ code: '23503' })).toBe(true)
-    expect(isPermanentError({ status: 409 })).toBe(true)
-    expect(isPermanentError({ code: 'PGRST116', status: 406 })).toBe(true)
+  test('tijdelijke databasecodes zijn tijdelijk', () => {
+    expect(isPermanentError({ code: '40001', status: 500 })).toBe(false)
+    expect(isPermanentError({ code: '08006' })).toBe(false)
+    expect(isPermanentError({ code: '57014', status: 500 })).toBe(false)
+    expect(isPermanentError({ code: '53300' })).toBe(false)
   })
-  test('verlopen login is tijdelijk', () => {
+  test('te veel verzoeken, time-out en verlopen login zijn tijdelijk', () => {
+    expect(isPermanentError({ status: 429 })).toBe(false)
+    expect(isPermanentError({ status: 408 })).toBe(false)
     expect(isPermanentError({ status: 401 })).toBe(false)
     expect(isPermanentError({ code: 'PGRST301', status: 401 })).toBe(false)
+  })
+  test('inhoudelijke weigeringen zijn definitief', () => {
+    expect(isPermanentError({ code: '23503', status: 409 })).toBe(true)
+    expect(isPermanentError({ code: '23505', status: 409 })).toBe(true)
+    expect(isPermanentError({ code: '42501', status: 403 })).toBe(true)
+    expect(isPermanentError({ code: '22P02', status: 400 })).toBe(true)
+    expect(isPermanentError({ code: 'PGRST116', status: 406 })).toBe(true)
+    expect(isPermanentError({ code: 'PGRST204', status: 400 })).toBe(true)
   })
 })

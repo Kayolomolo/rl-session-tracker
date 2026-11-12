@@ -46,7 +46,7 @@ function Gate() {
           </Route>
         </Routes>
         <IdleDialog />
-        <OfflineBadge online={data.online} pending={data.pending} />
+        <OfflineBadge online={data.online} pending={data.pending} dropped={data.dropped} />
       </HashRouter>
     </DataContext.Provider>
   )

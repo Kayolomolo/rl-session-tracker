@@ -1,4 +1,5 @@
 import { rankLabel } from './ranks'
+import type { Op } from './store'
 import type { Activity, Match, Mode, Profile, Result, Session } from './types'
 
 export function activeSession(sessions: Session[]): Session | undefined {
@@ -40,4 +41,17 @@ export function matchFields(profile: Profile, mode: Mode, result: Result, now: n
   const fields: Omit<Match, 'id'> = { mode, result, playedAt: now }
   if (entry && entry.tier !== 'Unranked') fields.rank = rankLabel(entry)
   return fields
+}
+
+/** Twee apparaten die tegelijk een sessie starten laten een oudere open sessie achter: sluit die op zijn laatste activiteit. */
+export function closeStaleSessions(sessions: Session[]): Op[] {
+  const open = sessions.filter((s) => s.endedAt === undefined).sort((a, b) => b.startedAt - a.startedAt)
+  return open.slice(1).flatMap((s): Op[] => {
+    const end = lastActivityAt(s)
+    const running = runningActivity(s)
+    return [
+      ...(running ? [{ t: 'activity' as const, sessionId: s.id, row: { ...running, endedAt: Math.max(running.startedAt, end) } }] : []),
+      { t: 'session', row: { id: s.id, startedAt: s.startedAt, endedAt: end, lastActivityAt: s.lastActivityAt } },
+    ]
+  })
 }

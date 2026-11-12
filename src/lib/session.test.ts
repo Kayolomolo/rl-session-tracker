@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { activeSession, isIdle, lastActivityAt, matchFields, resolveIdleEnd, runningActivity, suggestActivityMinutes } from './session'
+import { activeSession, closeStaleSessions, isIdle, lastActivityAt, matchFields, resolveIdleEnd, runningActivity, suggestActivityMinutes } from './session'
 import { act, m, MIN, profile, sess } from './testHelpers'
 
 describe('activeSession', () => {
@@ -51,5 +51,20 @@ describe('matchFields', () => {
   test('Unranked of ontbrekend geeft geen rank', () => {
     expect(matchFields(p, '1v1', 'loss', 7)).toEqual({ mode: '1v1', result: 'loss', playedAt: 7 })
     expect(matchFields(p, '3v3', 'loss', 7)).toEqual({ mode: '3v3', result: 'loss', playedAt: 7 })
+  })
+})
+
+describe('closeStaleSessions', () => {
+  test('sluit oudere open sessies op hun laatste activiteit, ook hun lopende timer', () => {
+    const old = sess({ id: 'old', startedAt: 0, matches: [m('2v2', 'win', 5 * MIN)], activities: [act('training', 'Aerials', 6 * MIN)] })
+    const newest = sess({ id: 'new', startedAt: 10 * MIN })
+    const ops = closeStaleSessions([newest, old])
+    expect(ops).toEqual([
+      { t: 'activity', sessionId: 'old', row: { ...old.activities[0], endedAt: 6 * MIN } },
+      { t: 'session', row: { id: 'old', startedAt: 0, endedAt: 6 * MIN, lastActivityAt: 0 } },
+    ])
+  })
+  test('één of geen open sessie: niets te doen', () => {
+    expect(closeStaleSessions([sess({ id: 'a', startedAt: 1 }), sess({ id: 'b', startedAt: 0, endedAt: 2 })])).toEqual([])
   })
 })
