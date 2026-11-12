@@ -1,18 +1,11 @@
-import { createContext, useContext } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { hasConfig } from './db/supabase'
-import { useMyData, type MyData } from './db/useMyData'
+import { DataContext, type Ready } from './db/dataContext'
+import { useMyData } from './db/useMyData'
 import { Layout, Placeholder } from './screens/Layout'
+import { Home } from './screens/Home'
 import { Login } from './screens/Login'
 import { Onboarding } from './screens/Onboarding'
-
-type Ready = MyData & { user: NonNullable<MyData['user']>; profile: NonNullable<MyData['profile']>; actions: NonNullable<MyData['actions']> }
-const DataContext = createContext<Ready | null>(null)
-export function useData(): Ready {
-  const d = useContext(DataContext)
-  if (!d) throw new Error('useData buiten DataContext')
-  return d
-}
 
 function Centered({ children }: { children: React.ReactNode }) {
   return <main className="flex min-h-screen items-center justify-center p-6 text-center text-muted">{children}</main>
@@ -36,7 +29,7 @@ function Gate() {
         <Routes>
           <Route path="/session" element={<Placeholder title="Sessie" />} />
           <Route element={<Layout />}>
-            <Route index element={<Placeholder title="Home" />} />
+            <Route index element={<Home />} />
             <Route path="/sessions" element={<Placeholder title="Sessions" />} />
             <Route path="/sessions/:id" element={<Placeholder title="Overzicht" />} />
             <Route path="/training" element={<Placeholder title="Training" />} />
