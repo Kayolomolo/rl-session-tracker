@@ -1,73 +1,60 @@
-import { id, type TransactionChunk } from '@instantdb/react'
-import type { AppSchema } from './instant.schema'
 import { activeSession, runningActivity } from '../lib/session'
-import type { ActivityKind, Match, Profile, Session } from '../lib/types'
-import { db } from './client'
+import type { Op, Store } from '../lib/store'
+import type { Activity, ActivityKind, Match, Profile, Session } from '../lib/types'
 
-export async function createProfile(userId: string, name: string): Promise<void> {
-  await db.transact(db.tx.profiles[id()].update({ name: name.trim(), createdAt: Date.now(), askMmr: false, idleMinutes: 45, lastMode: '2v2', ranks: {}, customActivities: { warmup: [], training: [] } }).link({ owner: userId }))
-}
+const uid = () => crypto.randomUUID()
+const core = (s: Session) => ({ id: s.id, startedAt: s.startedAt, endedAt: s.endedAt, lastActivityAt: s.lastActivityAt })
 
-export async function updateProfile(profileId: string, patch: Partial<Omit<Profile, 'id'>>): Promise<void> {
-  await db.transact(db.tx.profiles[profileId].update(patch))
-}
+export type Actions = ReturnType<typeof makeActions>
 
-export async function startSession(userId: string, sessions: Session[]): Promise<string> {
-  const existing = activeSession(sessions)
-  if (existing) return existing.id
-  const sid = id()
-  const now = Date.now()
-  await db.transact(db.tx.sessions[sid].update({ startedAt: now, lastActivityAt: now }).link({ owner: userId }))
-  return sid
-}
-
-export async function endSession(s: Session, endedAt: number): Promise<void> {
-  const txs: TransactionChunk<AppSchema, keyof AppSchema['entities']>[] = [db.tx.sessions[s.id].update({ endedAt })]
-  const running = runningActivity(s)
-  if (running) txs.push(db.tx.activities[running.id].update({ endedAt: Math.max(running.startedAt, endedAt) }))
-  await db.transact(txs)
-}
-
-export async function snoozeIdle(sessionId: string, now: number): Promise<void> {
-  await db.transact(db.tx.sessions[sessionId].update({ lastActivityAt: now }))
-}
-
-export async function addMatch(userId: string, sessionId: string, fields: Omit<Match, 'id'>): Promise<string> {
-  const mid = id()
-  await db.transact(db.tx.matches[mid].update(fields).link({ owner: userId, session: sessionId }))
-  return mid
-}
-
-export async function setMatchMmr(matchId: string, mmr: number): Promise<void> {
-  await db.transact(db.tx.matches[matchId].update({ mmr }))
-}
-
-export async function deleteMatch(matchId: string): Promise<void> {
-  await db.transact(db.tx.matches[matchId].delete())
-}
-
-export async function startActivity(userId: string, s: Session, kind: ActivityKind, type: string, now: number): Promise<string> {
-  const aid = id()
-  const txs: TransactionChunk<AppSchema, 'activities'>[] = [db.tx.activities[aid].update({ kind, type, startedAt: now }).link({ owner: userId, session: s.id })]
-  const running = runningActivity(s)
-  if (running) txs.unshift(db.tx.activities[running.id].update({ endedAt: Math.max(running.startedAt, now) }))
-  await db.transact(txs)
-  return aid
-}
-
-export async function stopActivity(activityId: string, endedAt: number, note?: string): Promise<void> {
-  const clean = note?.trim()
-  await db.transact(db.tx.activities[activityId].update(clean ? { endedAt, note: clean } : { endedAt }))
-}
-
-export async function deleteActivity(activityId: string): Promise<void> {
-  await db.transact(db.tx.activities[activityId].delete())
-}
-
-export async function deleteSession(s: Session): Promise<void> {
-  await db.transact([
-    ...s.matches.map((x) => db.tx.matches[x.id].delete()),
-    ...s.activities.map((a) => db.tx.activities[a.id].delete()),
-    db.tx.sessions[s.id].delete(),
-  ])
+export function makeActions(dispatch: (op: Op) => void, getStore: () => Store, userId: string) {
+  const stopRunning = (s: Session, at: number) => {
+    const running = runningActivity(s)
+    if (running) dispatch({ t: 'activity', sessionId: s.id, row: { ...running, endedAt: Math.max(running.startedAt, at) } })
+  }
+  return {
+    createProfile(name: string) {
+      dispatch({ t: 'profile', row: { id: userId, name: name.trim(), ranks: {}, askMmr: false, idleMinutes: 45, lastMode: '2v2', customActivities: { warmup: [], training: [] } } })
+    },
+    updateProfile(patch: Partial<Omit<Profile, 'id'>>) {
+      const p = getStore().profile
+      if (p) dispatch({ t: 'profile', row: { ...p, ...patch } })
+    },
+    startSession(): string {
+      const existing = activeSession(getStore().sessions)
+      if (existing) return existing.id
+      const now = Date.now()
+      const id = uid()
+      dispatch({ t: 'session', row: { id, startedAt: now, lastActivityAt: now } })
+      return id
+    },
+    endSession(s: Session, endedAt: number) {
+      stopRunning(s, endedAt)
+      dispatch({ t: 'session', row: { ...core(s), endedAt } })
+    },
+    snoozeIdle(s: Session, now: number) {
+      dispatch({ t: 'session', row: { ...core(s), lastActivityAt: now } })
+    },
+    addMatch(sessionId: string, fields: Omit<Match, 'id'>): string {
+      const id = uid()
+      dispatch({ t: 'match', sessionId, row: { id, ...fields } })
+      return id
+    },
+    setMatchMmr(sessionId: string, match: Match, mmr: number) {
+      dispatch({ t: 'match', sessionId, row: { ...match, mmr } })
+    },
+    deleteMatch(id: string) { dispatch({ t: 'delMatch', id }) },
+    startActivity(s: Session, kind: ActivityKind, type: string, now: number): string {
+      stopRunning(s, now)
+      const id = uid()
+      dispatch({ t: 'activity', sessionId: s.id, row: { id, kind, type, startedAt: now } })
+      return id
+    },
+    stopActivity(sessionId: string, a: Activity, endedAt: number, note?: string) {
+      const clean = note?.trim()
+      dispatch({ t: 'activity', sessionId, row: { ...a, endedAt: Math.max(a.startedAt, endedAt), ...(clean ? { note: clean } : {}) } })
+    },
+    deleteActivity(id: string) { dispatch({ t: 'delActivity', id }) },
+    deleteSession(s: Session) { dispatch({ t: 'delSession', id: s.id }) },
+  }
 }

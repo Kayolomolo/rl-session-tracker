@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@fontsource/saira-condensed": "^5.3.0",
-    "@instantdb/react": "^1.0.67",
+    "@supabase/supabase-js": "^2.119.0",
     "@tabler/icons-react": "^3.51.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

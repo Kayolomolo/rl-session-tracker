@@ -1,7 +1,9 @@
+import { useMemo } from 'react'
 import { activeSession } from '../lib/session'
 import type { Profile, Session } from '../lib/types'
-import { db } from './client'
-import { toProfile, toSession, type RawProfile, type RawSession } from './mappers'
+import { makeActions, type Actions } from './actions'
+import { useAuth } from './auth'
+import { useSync } from './sync'
 
 export interface MyData {
   isLoading: boolean
@@ -10,24 +12,19 @@ export interface MyData {
   profile?: Profile
   sessions: Session[]
   active?: Session
+  actions?: Actions
+  pending: number
+  online: boolean
 }
 
 export function useMyData(): MyData {
-  const auth = db.useAuth()
-  const q = db.useQuery(auth.user ? { profiles: {}, sessions: { matches: {}, activities: {} } } : null)
-  if (auth.isLoading) return { isLoading: true, sessions: [] }
-  if (auth.error) return { isLoading: false, error: auth.error.message, sessions: [] }
-  if (!auth.user) return { isLoading: false, sessions: [] }
-  const user = { id: auth.user.id, email: auth.user.email ?? '' }
-  if (q.isLoading) return { isLoading: true, user, sessions: [] }
-  if (q.error) return { isLoading: false, error: q.error.message, user, sessions: [] }
-  const sessions = (q.data?.sessions ?? []).map((s) => toSession(s as unknown as RawSession)).sort((a, b) => b.startedAt - a.startedAt)
-  const rawProfile = q.data?.profiles?.[0]
-  return {
-    isLoading: false,
-    user,
-    profile: rawProfile ? toProfile(rawProfile as unknown as RawProfile) : undefined,
-    sessions,
-    active: activeSession(sessions),
-  }
+  const auth = useAuth()
+  const sync = useSync(auth.user?.id)
+  const userId = auth.user?.id
+  const actions = useMemo(() => (userId ? makeActions(sync.dispatch, sync.getStore, userId) : undefined), [userId, sync.dispatch, sync.getStore])
+  const base = { pending: sync.pending, online: sync.online, sessions: sync.store.sessions }
+  if (auth.loading) return { ...base, isLoading: true }
+  if (!auth.user) return { ...base, isLoading: false }
+  if (!sync.loaded) return { ...base, isLoading: true, user: auth.user }
+  return { ...base, isLoading: false, error: sync.error, user: auth.user, profile: sync.store.profile, active: activeSession(sync.store.sessions), actions }
 }

@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { Card } from '../components/Card'
 import { Heading, Label } from '../components/Label'
 import { SkewButton } from '../components/SkewButton'
-import { createProfile } from '../db/actions'
+import type { Actions } from '../db/actions'
 
-export function Onboarding({ userId }: { userId: string }) {
+export function Onboarding({ actions }: { actions: Actions }) {
   const [name, setName] = useState('')
   const [error, setError] = useState('')
-  const save = () => (name.trim() ? createProfile(userId, name) : setError('Vul een naam in'))
+  const save = () => (name.trim() ? actions.createProfile(name) : setError('Vul een naam in'))
   return (
     <main className="mx-auto flex min-h-screen max-w-[520px] flex-col justify-center gap-6 p-5">
       <Heading className="text-4xl">Welkom op het <span className="text-blue-text">veld</span></Heading>
