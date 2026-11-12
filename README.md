@@ -1,32 +1,29 @@
-# React + TypeScript + Vite
+# RL Session Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Webapp (PWA) om je Rocket League-sessies bij te houden: wedstrijden (1v1/2v2/3v3, win/loss), warm-up en training met timers, en een overzicht na elke sessie. Gegevens staan in Supabase en worden gesynchroniseerd tussen je apparaten; zonder internet worden wijzigingen bewaard en later verstuurd.
 
-Currently, two official plugins are available:
+## Starten
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env.local   # vul VITE_SUPABASE_URL en VITE_SUPABASE_ANON_KEY in
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Testen en bouwen
+
+```bash
+npm test        # Vitest: alle rekenlogica (statistieken, streaks, inactiviteit, wachtrij)
+npm run build   # productiebuild in dist/
+```
+
+## Database
+
+Het schema staat in `supabase/schema.sql`. Uitvoeren in Supabase → SQL Editor. Inloggen gaat met e-mail en wachtwoord (Supabase Auth, e-mailbevestiging aan).
+
+## Opbouw
+
+- `src/lib/` — pure logica zonder React, volledig getest
+- `src/db/` — Supabase-client, inloggen, lokale wachtrij + synchronisatie (`sync.ts`), acties
+- `src/components/` — UI-bouwstenen in RL-stijl
+- `src/screens/` — één bestand per scherm

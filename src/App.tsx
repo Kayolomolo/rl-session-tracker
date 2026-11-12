@@ -1,4 +1,5 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { OfflineBadge } from './components/OfflineBadge'
 import { hasConfig } from './db/supabase'
 import { DataContext, type Ready } from './db/dataContext'
 import { useMyData } from './db/useMyData'
@@ -45,6 +46,7 @@ function Gate() {
           </Route>
         </Routes>
         <IdleDialog />
+        <OfflineBadge online={data.online} pending={data.pending} />
       </HashRouter>
     </DataContext.Provider>
   )
