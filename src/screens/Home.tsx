@@ -36,10 +36,14 @@ export function Home() {
 
   return (
     <>
-      <section className="relative -mx-4 -mt-[calc(16px+env(safe-area-inset-top))] flex min-h-[clamp(196px,50vw,250px)] flex-col justify-between overflow-hidden px-4 pb-6 pt-[calc(14px+env(safe-area-inset-top))]">
-        <img src="theme/hero.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[calc(104px+env(safe-area-inset-top))] bg-gradient-to-b from-[#050c1c]/75 to-transparent" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-[#050c1c]" />
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-[#050c1c]">
+        <img src="theme/stadium.webp" alt="" className="h-full w-full object-cover object-[50%_32%]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_12_28/.15)_0%,rgb(5_12_28/.35)_30%,rgb(5_12_28/.6)_60%,rgb(5_12_28/.35)_100%)]" />
+      </div>
+      <section className="relative -mx-4 -mt-[calc(16px+env(safe-area-inset-top))] flex min-h-[calc(clamp(250px,68vw,310px)+env(safe-area-inset-top))] flex-col justify-between overflow-hidden px-4 pb-6 pt-[calc(14px+env(safe-area-inset-top))]">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[calc(90px+env(safe-area-inset-top))] bg-gradient-to-b from-[#050c1c]/70 to-transparent" />
+        <img src="theme/ball.webp" alt="" aria-hidden="true" className="pointer-events-none absolute bottom-[34px] left-[-6%] w-[37%] max-w-[200px] drop-shadow-[0_0_18px_rgb(30_139_255/.45)]" />
+        <img src="theme/car.webp" alt="" aria-hidden="true" className="pointer-events-none absolute bottom-[70px] right-[7%] w-[46%] max-w-[240px] drop-shadow-[0_8px_14px_rgb(0_0_0/.6)]" />
       <header className="relative flex items-center gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-blue bg-[#071733]/90 font-display text-xl font-bold italic shadow-[0_0_14px_rgb(30_139_255/.7)]">{profile.name.charAt(0).toUpperCase()}</div>
         <div className="min-w-0 flex-1">
