@@ -1,8 +1,8 @@
 import { applyOp, type Op, type Store } from '../lib/store'
 import type { Goal, GoalConfig } from '../lib/goals'
-import type { ActivityKind, Mode, Profile, RankEntry, Result } from '../lib/types'
+import type { ActivityKind, Mode, Profile, RankEntry, Result, TrackerProfile } from '../lib/types'
 
-export interface ProfileRow { id: string; name: string; ranks: unknown; ask_mmr: boolean | null; idle_minutes: number | null; last_mode: string | null; custom_activities: unknown; created_at?: number | null }
+export interface ProfileRow { id: string; name: string; ranks: unknown; ask_mmr: boolean | null; idle_minutes: number | null; last_mode: string | null; custom_activities: unknown; tracker?: unknown; created_at?: number | null }
 export interface SessionRow { id: string; user_id: string; started_at: number; ended_at: number | null; last_activity_at: number }
 export interface MatchRow { id: string; user_id: string; session_id: string; mode: string; result: string; rank: string | null; mmr: number | null; played_at: number }
 export interface ActivityRow { id: string; user_id: string; session_id: string; kind: string; type: string; started_at: number; ended_at: number | null; note: string | null }
@@ -24,7 +24,14 @@ function toProfile(r: ProfileRow): Profile {
     idleMinutes: r.idle_minutes ?? 45,
     lastMode: (r.last_mode as Mode | null) ?? '2v2',
     customActivities: { warmup: custom.warmup ?? [], training: custom.training ?? [] },
+    ...toTracker(r.tracker),
   }
+}
+
+function toTracker(raw: unknown): { tracker?: TrackerProfile } {
+  const t = raw as Partial<TrackerProfile> | null | undefined
+  if (!t || (t.platform !== 'epic' && t.platform !== 'steam') || typeof t.id !== 'string' || !t.id.trim()) return {}
+  return { tracker: { platform: t.platform, id: t.id } }
 }
 
 function toGoal(r: GoalRow): Goal {
@@ -58,7 +65,7 @@ export function opToRequest(op: Op, userId: string): Request {
     case 'activity':
       return { table: 'activities', kind: 'upsert', row: { id: op.row.id, user_id: userId, session_id: op.sessionId, kind: op.row.kind, type: op.row.type, started_at: op.row.startedAt, ended_at: op.row.endedAt ?? null, note: op.row.note ?? null } }
     case 'profile':
-      return { table: 'profiles', kind: 'upsert', row: { id: op.row.id, name: op.row.name, ranks: op.row.ranks, ask_mmr: op.row.askMmr, idle_minutes: op.row.idleMinutes, last_mode: op.row.lastMode, custom_activities: op.row.customActivities } }
+      return { table: 'profiles', kind: 'upsert', row: { id: op.row.id, name: op.row.name, ranks: op.row.ranks, ask_mmr: op.row.askMmr, idle_minutes: op.row.idleMinutes, last_mode: op.row.lastMode, custom_activities: op.row.customActivities, ...(op.row.tracker !== undefined ? { tracker: op.row.tracker } : {}) } }
     case 'delMatch': return { table: 'matches', kind: 'delete', id: op.id }
     case 'delActivity': return { table: 'activities', kind: 'delete', id: op.id }
     case 'delSession': return { table: 'sessions', kind: 'delete', id: op.id }

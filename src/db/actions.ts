@@ -2,6 +2,7 @@ import { activeSession, runningActivity } from '../lib/session'
 import type { Op, Store } from '../lib/store'
 import type { Goal, GoalConfig } from '../lib/goals'
 import type { Activity, ActivityKind, Match, Profile, Session } from '../lib/types'
+import { profileWithMmr } from '../lib/mmr'
 
 const uid = () => crypto.randomUUID()
 const core = (s: Session) => ({ id: s.id, startedAt: s.startedAt, endedAt: s.endedAt, lastActivityAt: s.lastActivityAt })
@@ -43,6 +44,8 @@ export function makeActions(dispatch: (op: Op) => void, getStore: () => Store, u
     },
     setMatchMmr(sessionId: string, match: Match, mmr: number) {
       dispatch({ t: 'match', sessionId, row: { ...match, mmr } })
+      const p = getStore().profile
+      if (p) dispatch({ t: 'profile', row: profileWithMmr(p, match.mode, mmr) })
     },
     deleteMatch(id: string) { dispatch({ t: 'delMatch', id }) },
     startActivity(s: Session, kind: ActivityKind, type: string, now: number): string {

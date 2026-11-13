@@ -5,15 +5,25 @@ import { SkewButton } from '../components/SkewButton'
 import { signOut } from '../db/auth'
 import { useData } from '../db/dataContext'
 import { hasDivisions, RANK_TIERS, rankLabel } from '../lib/ranks'
-import { MODES, type Mode, type RankEntry } from '../lib/types'
+import { MODES, type Mode, type RankEntry, type TrackerProfile } from '../lib/types'
 import { RankIcon } from '../components/RankIcon'
+import { TrackerLink } from '../components/TrackerLink'
+import { cleanTrackerId } from '../lib/mmr'
 
 const field = 'rounded-xl border border-rl-line bg-rl-nav px-3 py-2.5 text-ink outline-none focus:border-blue'
 
 export function ProfilePage() {
   const { profile, user, actions } = useData()
   const [name, setName] = useState(profile.name)
+  const [trackerPlatform, setTrackerPlatform] = useState<TrackerProfile['platform']>('epic')
   const [idle, setIdle] = useState(String(profile.idleMinutes))
+  const [trackerId, setTrackerId] = useState(profile.tracker?.id ?? '')
+  const platform: TrackerProfile['platform'] = profile.tracker?.platform ?? trackerPlatform
+  const saveTracker = (p: TrackerProfile['platform'], raw: string) => {
+    const id = cleanTrackerId(raw)
+    setTrackerPlatform(p)
+    actions.updateProfile({ tracker: id ? { platform: p, id } : null })
+  }
 
   const setRank = (mode: Mode, patch: Partial<RankEntry>) => {
     const current = profile.ranks[mode] ?? { tier: 'Unranked' }
@@ -56,6 +66,19 @@ export function ProfilePage() {
             </div>
           )
         })}
+      </Card>
+
+      <Card className="space-y-3">
+        <Label>Tracker-profiel</Label>
+        <p className="text-xs text-muted">Je naam op rocketleague.tracker.network, om snel je MMR op te zoeken.</p>
+        <div className="flex gap-2" role="group" aria-label="Platform">
+          {(['epic', 'steam'] as const).map((p) => (
+            <SkewButton key={p} variant={platform === p ? 'light' : 'ghost'} onClick={() => saveTracker(p, trackerId)} ariaLabel={`Platform ${p === 'epic' ? 'Epic' : 'Steam'}`}>{p === 'epic' ? 'Epic' : 'Steam'}</SkewButton>
+          ))}
+        </div>
+        <input aria-label={platform === 'epic' ? 'Epic-naam' : 'Steam-ID'} placeholder={platform === 'epic' ? 'Epic-naam' : 'Steam-ID (17 cijfers)'} maxLength={64}
+          className={`${field} w-full`} value={trackerId} onChange={(e) => setTrackerId(e.target.value)} onBlur={() => saveTracker(platform, trackerId)} />
+        <TrackerLink tracker={profile.tracker} className="w-full" />
       </Card>
 
       <Card className="space-y-4">

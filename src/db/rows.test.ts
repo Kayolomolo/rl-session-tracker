@@ -48,3 +48,22 @@ test('rowsToStore en opToRequest voor doelen', () => {
   })
   expect(opToRequest({ t: 'delGoal', id: 'g1' }, 'u1')).toEqual({ table: 'goals', kind: 'delete', id: 'g1' })
 })
+
+test('tracker-profiel uit de database komt in het profiel; ongeldig wordt genegeerd', () => {
+  const base = { id: 'u1', name: 'Kay', ranks: {}, ask_mmr: false, idle_minutes: 45, last_mode: '2v2', custom_activities: {} }
+  expect(rowsToStore([{ ...base, tracker: { platform: 'epic', id: 'Kayolomolo' } }], [], [], []).profile?.tracker).toEqual({ platform: 'epic', id: 'Kayolomolo' })
+  expect(rowsToStore([{ ...base, tracker: { platform: 'xbox', id: 'x' } }], [], [], []).profile?.tracker).toBeUndefined()
+  expect(rowsToStore([{ ...base, tracker: null }], [], [], []).profile?.tracker).toBeUndefined()
+})
+test('profiel zonder tracker stuurt geen tracker-kolom mee (werkt ook zonder nieuwe kolom)', () => {
+  const req = opToRequest({ t: 'profile', row: { id: 'u1', name: 'Kay', ranks: {}, askMmr: true, idleMinutes: 30, lastMode: '1v1', customActivities: { warmup: [], training: [] } } }, 'u1')
+  expect('tracker' in (req as { row: object }).row).toBe(false)
+})
+test('profiel met tracker stuurt de tracker-kolom mee', () => {
+  const req = opToRequest({ t: 'profile', row: { id: 'u1', name: 'Kay', ranks: {}, askMmr: true, idleMinutes: 30, lastMode: '1v1', customActivities: { warmup: [], training: [] }, tracker: { platform: 'steam', id: '123' } } }, 'u1')
+  expect(req).toMatchObject({ row: { tracker: { platform: 'steam', id: '123' } } })
+})
+test('tracker leegmaken stuurt null zodat de oude naam verdwijnt', () => {
+  const req = opToRequest({ t: 'profile', row: { id: 'u1', name: 'Kay', ranks: {}, askMmr: true, idleMinutes: 30, lastMode: '1v1', customActivities: { warmup: [], training: [] }, tracker: null } }, 'u1')
+  expect(req).toMatchObject({ row: { tracker: null } })
+})

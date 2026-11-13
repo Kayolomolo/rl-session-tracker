@@ -15,4 +15,8 @@ export interface Profile {
   idleMinutes: number
   lastMode: Mode
   customActivities: Record<ActivityKind, string[]>
+  /** undefined = nooit ingesteld (kolom niet meesturen), null = leeggemaakt */
+  tracker?: TrackerProfile | null
 }
+
+export interface TrackerProfile { platform: 'epic' | 'steam'; id: string }
